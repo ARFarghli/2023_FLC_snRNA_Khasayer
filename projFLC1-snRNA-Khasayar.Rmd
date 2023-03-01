@@ -1,0 +1,532 @@
+---
+title: "FLC snRNA-seq clustering"
+author: "Alaa R. Farghli"
+date: "Last compiled on `r format(Sys.time(), '%d %B %Y')`"
+output:
+  html_document: 
+    toc: true
+    toc_float: true
+    theme: flatly
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**Note:** This step was performed on a BioHPC "medium gen2: 40 cores, 256GB RAM" machine. I also performed this step on R 4.1.3, as R 4.2.1 cannot load the "stats" package for downstream steps
+
+```{r load-libraries}
+library(stringr)
+library(Seurat)
+library(tidyverse)
+library(openxlsx)
+library(scDblFinder)
+library(BiocParallel)
+```
+
+```{r load-data}
+set.seed(1234)
+
+proj_name <- "FLCvNML"
+
+##Setup the Seurat objects
+
+# Load the counts matricies into separate datasets
+N008.data <- Read10X(data.dir = "./soupx-adj-counts/soupx_N008_filt/")
+N014.data <- Read10X(data.dir = "./soupx-adj-counts/soupx_N014_filt/")
+N015.data <- Read10X(data.dir = "./soupx-adj-counts/soupx_N015_filt/")
+N021.data <- Read10X(data.dir = "./soupx-adj-counts/soupx_N021_filt/")
+T005.data <- Read10X(data.dir = "./soupx-adj-counts/soupx_T005_filt/")
+T008.data <- Read10X(data.dir = "./soupx-adj-counts/soupx_T008_filt/")
+T014.data <- Read10X(data.dir = "./soupx-adj-counts/soupx_T014_filt/")
+T015.data <- Read10X(data.dir = "./soupx-adj-counts/soupx_T015_filt/")
+T021.data <- Read10X(data.dir = "./soupx-adj-counts/soupx_N021_filt/")
+T034.data <- Read10X(data.dir = "./soupx-adj-counts/soupx_T034_filt/")
+T038.data <- Read10X(data.dir = "./soupx-adj-counts/soupx_T038_filt/")
+
+# check for duplicated barcodes(column names) within a dataset
+any(duplicated(x = colnames(x = N008.data))) # FALSE
+any(duplicated(x = colnames(x = N014.data))) # FALSE
+any(duplicated(x = colnames(x = N015.data))) # FALSE
+any(duplicated(x = colnames(x = N021.data))) # FALSE
+any(duplicated(x = colnames(x = T005.data))) # FALSE
+any(duplicated(x = colnames(x = T008.data))) # FALSE
+any(duplicated(x = colnames(x = T014.data))) # FALSE
+any(duplicated(x = colnames(x = T015.data))) # FALSE
+any(duplicated(x = colnames(x = T021.data))) # FALSE
+any(duplicated(x = colnames(x = T034.data))) # FALSE
+any(duplicated(x = colnames(x = T038.data))) # FALSE
+
+# Rename columns to avoid trouble when merging data sets (since identical columns between KO and WT)
+colnames(x = N008.data) <- paste('NML_N008', colnames(x = N008.data), sep = '_')
+colnames(x = N014.data) <- paste('NML_N014', colnames(x = N014.data), sep = '_')
+colnames(x = N015.data) <- paste('NML_N015', colnames(x = N015.data), sep = '_')
+colnames(x = N021.data) <- paste('NML_N021', colnames(x = N021.data), sep = '_')
+
+colnames(x = T005.data) <- paste('FLC_T005', colnames(x = T005.data), sep = '_')
+colnames(x = T008.data) <- paste('FLC_T008', colnames(x = T008.data), sep = '_')
+colnames(x = T014.data) <- paste('FLC_T014', colnames(x = T014.data), sep = '_')
+colnames(x = T015.data) <- paste('FLC_T015', colnames(x = T015.data), sep = '_')
+colnames(x = T021.data) <- paste('FLC_T021', colnames(x = T021.data), sep = '_')
+colnames(x = T034.data) <- paste('FLC_T034', colnames(x = T034.data), sep = '_')
+colnames(x = T038.data) <- paste('FLC_T034', colnames(x = T038.data), sep = '_')
+```
+
+```{r Create Seurat Object}
+### Initialize the Seurat object with the raw, non-normalized data
+# Keep all genes expressed in >= 3 cells. 
+# Keep all cells with at least 200 detected genes.
+N008 <- CreateSeuratObject(counts = N008.data, 
+                            min.cells = 3, 
+                            min.features = 200, 
+                            project = "N008")
+N014 <- CreateSeuratObject(counts = N014.data, 
+                            min.cells = 3, 
+                            min.features = 200, 
+                            project = "N014")
+N015 <- CreateSeuratObject(counts = N015.data, 
+                            min.cells = 3, 
+                            min.features = 200, 
+                            project = "N015")
+N021 <- CreateSeuratObject(counts = N021.data, 
+                            min.cells = 3, 
+                            min.features = 200, 
+                            project = "N021")
+T005 <- CreateSeuratObject(counts = T005.data, 
+                            min.cells = 3, 
+                            min.features = 200, 
+                            project = "T005")
+T008 <- CreateSeuratObject(counts = T008.data, 
+                            min.cells = 3, 
+                            min.features = 200, 
+                            project = "T008")
+T014 <- CreateSeuratObject(counts = T014.data, 
+                            min.cells = 3, 
+                            min.features = 200, 
+                            project = "T014")
+T015 <- CreateSeuratObject(counts = T015.data, 
+                            min.cells = 3, 
+                            min.features = 200, 
+                            project = "T015")
+T021 <- CreateSeuratObject(counts = T021.data, 
+                            min.cells = 3, 
+                            min.features = 200, 
+                            project = "T015")
+T034 <- CreateSeuratObject(counts = T034.data, 
+                            min.cells = 3, 
+                            min.features = 200, 
+                            project = "T034")
+T038 <- CreateSeuratObject(counts = T038.data, 
+                            min.cells = 3, 
+                            min.features = 200, 
+                            project = "T038")
+```
+
+```{r Add group status to Seurat objects}
+### add treatment/group status to objects
+# add group
+N008[["status"]] <- "NML"
+N014[["status"]] <- "NML"
+N015[["status"]] <- "NML"
+N021[["status"]] <- "NML"
+T005[["status"]] <- "FLC"
+T008[["status"]] <- "FLC"
+T014[["status"]] <- "FLC"
+T015[["status"]] <- "FLC"
+T021[["status"]] <- "FLC"
+T034[["status"]] <- "FLC"
+T038[["status"]] <- "FLC"
+
+N008[["id"]] <- "N008"
+N014[["id"]] <- "N014"
+N015[["id"]] <- "N015"
+N021[["id"]] <- "N021"
+T005[["id"]] <- "T005"
+T008[["id"]] <- "T008"
+T014[["id"]] <- "T014"
+T015[["id"]] <- "T015"
+T021[["id"]] <- "T021"
+T034[["id"]] <- "T034"
+T038[["id"]] <- "T034"
+
+N008
+N014
+N015
+N021
+T005
+T008
+T014
+T015
+T021
+T034
+T038
+```
+
+```{r Merge dataset, cache = T}
+set.seed(1234)
+
+# Merge datasets into one single seurat object
+alldata <- merge(N008, y = c(N014, N015, N021, 
+                             T005, T008, T014, T015, T021, T034, T038), 
+                 add.cell.ids = c("N008", "N014", "N015", "N021", 
+                             "T005", "T008", "T014", "T015", "T021", "T034", "T038"),
+                 project = "fullFLC")
+
+alldata
+
+# Convert to single cell experiment
+sce <- as.SingleCellExperiment(alldata)
+```
+
+```{r Run scDoubletFinder}
+bp <- MulticoreParam(20, RNGseed=1234)
+bpstart(bp)
+sce <- scDblFinder(sce, 
+                   samples="id", 
+                   BPPARAM=bp)
+
+bpstop(bp)
+
+# If the code above doesn't work, unhash and try this.
+
+#sce <- scDblFinder(sce,
+#                   samples="id",
+#                   BPPARAM=MulticoreParam(3))
+
+table(sce$scDblFinder.class)
+
+# Write out metadata of doublet scores to flat file
+sce@colData %>% 
+  as.data.frame() %>%
+  rownames_to_column(var = "cell_id") %>%
+  dplyr::select(cell_id, contains("scDblFinder")) %>%
+  write_csv(paste0(proj_name, "_scDbtFinder_metadata.csv"))
+
+
+sce_sub <- subset(sce, ,scDblFinder.class=="singlet")
+table(sce_sub$scDblFinder.class)
+
+singlet_cell_id <- colnames(sce_sub)
+```
+
+```{r}
+saveRDS(alldata, "./alldata.rds")
+saveRDS(sce, "./sce.rds")
+sce <- readRDS("./sce.rds")
+```
+
+```{r}
+for (i in 1:length(singlet_cell_id)) {
+  singlet_cell_id[i] <- substr(singlet_cell_id[i], 6, nchar(singlet_cell_id[i]))
+}
+```
+
+```{r}
+# The [[ operator can add columns to object metadata. This is a great place to stash QC stats
+alldata[["percent.mt"]] <- PercentageFeatureSet(alldata, pattern = "^MT-")
+```
+
+```{r}
+# Visualize QC metrics as a violin plot
+VlnPlot(alldata, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+```
+
+```{r}
+# FeatureScatter is typically used to visualize feature-feature relationships, but can be used
+# for anything calculated by the object, i.e. columns in object metadata, PC scores etc.
+
+plot1 <- FeatureScatter(alldata, feature1 = "nCount_RNA", feature2 = "percent.mt")
+plot2 <- FeatureScatter(alldata, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+plot1 + plot2
+```
+
+
+### QC and filtering
+
+```{r qc-and-filtering, fig.width = 5, fig.height = 6}
+set.seed(1234)
+# Calculate percentage of mitochondrial counts
+obj.list <- list(N008, N014, N015, N021, T005, T008, T014, T015, T021, T034, T038)
+
+# Remove cells classified as doublets by scDblFinder
+for (i in 1:length(obj.list)) {
+  print(obj.list[[i]]@project.name)
+  print(paste0("Number of cells: ", ncol(obj.list[[i]])))
+  obj.list[[i]] <- obj.list[[i]][,intersect(colnames(obj.list[[i]]), singlet_cell_id)]
+  print(paste0("Number of cells: ", ncol(obj.list[[i]])))
+  print(" ")
+}
+
+# Add % of reads mapping to mitochondrial genes
+for (i in 1:length(obj.list)) {
+  obj.list[[i]] <- PercentageFeatureSet(obj.list[[i]], pattern = "^MT-", col.name = 'percent.mt') 
+  obj.list[[i]][["per.mito.bin"]] <- ifelse(obj.list[[i]][["percent.mt"]] > 20, "> 20%", ifelse(obj.list[[i]][["percent.mt"]] > 10, "10%-20%", ifelse(obj.list[[i]][["percent.mt"]] > 2.5, "2.5%-10%", "< 2.5%")))
+}
+
+# Visualize QC metrics as a violin plot
+plts <- lapply(obj.list, function(x) VlnPlot(x, 
+                                             features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), 
+                                             group.by = "id",
+                                             pt.size = 0,
+                                             ncol = 3))
+
+patchwork::wrap_plots(plts, ncol = 1)
+ggsave(paste0(proj_name, "_QC_no-pts.png"), units = "in", width = 5, height = 4 * length(obj.list), dpi = 300)
+
+plts <- lapply(obj.list, function(x) VlnPlot(x, 
+                                             features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), 
+                                             group.by = "id",
+                                             pt.size = 0.25,
+                                             ncol = 3))
+
+patchwork::wrap_plots(plts, ncol = 1)
+ggsave(paste0(proj_name, "_QC.png"), units = "in", width = 5, height = 4 * length(obj.list), dpi = 300)
+
+# Subset loop
+
+for (i in 1:length(obj.list)) {
+  print(obj.list[[i]]@project.name)
+  print(paste0("Number of cells: ", ncol(obj.list[[i]])))
+  obj.list[[i]] <- subset(obj.list[[i]], subset = nFeature_RNA > 1000 & percent.mt < 20)
+  print(paste0("Number of cells: ", ncol(obj.list[[i]])))
+  print(" ")
+}
+```
+
+```{r}
+nFeature_RNA > 1000 & percent.mt < 25
+ "N008"
+ "Number of cells: 21713"
+ "Number of cells: 18082"
+ " "
+ "N014"
+ "Number of cells: 16844"
+ "Number of cells: 8702"
+ " "
+ "N015"
+ "Number of cells: 17425"
+ "Number of cells: 15490"
+ " "
+ "N021"
+ "Number of cells: 20046"
+ "Number of cells: 16535"
+ " "
+ "T005"
+ "Number of cells: 25734"
+ "Number of cells: 17382"
+ " "
+ "T008"
+ "Number of cells: 23090"
+ "Number of cells: 14735"
+ " "
+ "T014"
+ "Number of cells: 27915"
+ "Number of cells: 18958"
+ " "
+ "T015"
+ "Number of cells: 29013"
+ "Number of cells: 23140"
+ " "
+ "T015"
+ "Number of cells: 20046"
+ "Number of cells: 16535"
+ " "
+ "T034"
+ "Number of cells: 24953"
+ "Number of cells: 13880"
+ " "
+"T038"
+"Number of cells: 5026"
+"Number of cells: 3892"
+
+```
+
+```{r}
+nFeature_RNA > 1000 & percent.mt < 20
+ "N008"
+ "Number of cells: 18130"
+ "Number of cells: 14503"
+ " "
+ "N014"
+ "Number of cells: 14662"
+ "Number of cells: 6625"
+ " "
+ "N015"
+ "Number of cells: 14426"
+ "Number of cells: 12491"
+ " "
+ "N021"
+ "Number of cells: 17637"
+ "Number of cells: 14132"
+ " "
+ "T005"
+ "Number of cells: 22116"
+ "Number of cells: 14172"
+ " "
+ "T008"
+ "Number of cells: 18612"
+ "Number of cells: 10388"
+ " "
+ "T014"
+ "Number of cells: 23717"
+ "Number of cells: 14875"
+ " "
+ "T015"
+ "Number of cells: 24322"
+ "Number of cells: 18475"
+ " "
+ "T015"
+ "Number of cells: 17742"
+ "Number of cells: 14231"
+ " "
+ "T034"
+ "Number of cells: 20718"
+ "Number of cells: 10490"
+ " "
+ "T038"
+ "Number of cells: 4564"
+ "Number of cells: 3457"
+ " "
+```
+
+### SC Transform
+
+The latest version of sctransform also supports using glmGamPoi package which substantially improves the speed of the learning procedure. It can be invoked by specifying method="glmGamPoi".
+
+```{r sctransform, cache=T, message=F}
+set.seed(1234)
+obj.list <- lapply(X = obj.list, FUN = function(x) {
+    x <- SCTransform(x, 
+                     method = "glmGamPoi", 
+                     assay = "RNA",
+                     new.assay.name = "SCT")
+})
+
+features <- SelectIntegrationFeatures(object.list = obj.list, nfeatures = 3000)
+obj.list <- PrepSCTIntegration(object.list = obj.list, anchor.features = features)
+
+saveRDS(obj.list, "./objlist.rds")
+
+integration.anchors <- FindIntegrationAnchors(object.list = obj.list, normalization.method = "SCT", anchor.features = features)
+
+# saveRDS(integration.anchors, "./integrationanchors.rds")
+integration.anchors <- readRDS("./integrationanchors.rds")
+
+seurat_obj <- IntegrateData(anchorset = integration.anchors, normalization.method = "SCT")
+saveRDS(seurat_obj, "./integrated-seurat-obj.rds")
+```
+### Clustering and visualization
+
+The Seurat SCT vignette states that 30 PCs should be used, as this will increase performance.
+
+```{r clustering, message=F}
+set.seed(1234)
+# Run the standard workflow for visualization and clustering
+seurat_obj <- RunPCA(seurat_obj)
+seurat_obj <- RunUMAP(seurat_obj, reduction = "pca", dims = 1:30)
+
+seurat_obj <- FindNeighbors(seurat_obj, reduction = "pca", dims = 1:30)
+
+saveRDS(seurat_obj, "./neighbors-seurat-obj.rds")
+
+dir.create("res_iter")
+
+for (i in seq(.1, 1.5, by = .1)) {
+  seurat_obj_tmp <- FindClusters(seurat_obj, resolution = i)
+  DimPlot(seurat_obj_tmp, reduction = "umap", label = T)
+  ggsave(paste0("res_iter/", proj_name, '_res-iter_', i, '_umap.png'), units = 'in', width = 6, height = 5, dpi = 250)
+}
+
+seurat_obj <- FindClusters(seurat_obj, resolution = 0.7)
+
+### Set default assay to RNA
+DefaultAssay(seurat_obj) <- "RNA"
+seurat_obj <- NormalizeData(seurat_obj)
+seurat_obj <- ScaleData(seurat_obj)
+
+saveRDS(seurat_obj, paste0(proj_name, '_seurat-obj.rds'))
+seurat_obj <- readRDS(file = "./FLCvNML_seurat-obj.rds")
+```
+
+
+```{r UMAP-plot, fig.width=6, fig.height=10}
+### Make UMAP plots
+
+plt1 <- DimPlot(seurat_obj, reduction = "umap", label = T)
+plt2 <- DimPlot(seurat_obj, reduction = "umap", group.by = "status")
+plt1 / plt2
+ggsave(paste0(proj_name, '_umap.png'), units = 'in', width = 6, height = 10, dpi = 250)
+
+```
+
+
+```{r UMAP-extra-metrics, fig.width=6, fig.height=30}
+### Add additional metadata
+seurat_obj[["scDblFinder.scores"]] <- sce_sub[,colnames(seurat_obj)]$scDblFinder.score
+seurat_obj <- CellCycleScoring(
+    seurat_obj,
+    s.features = str_to_title(cc.genes$s.genes),
+    g2m.features = str_to_title(cc.genes$g2m.genes),
+    assay = 'SCT',
+    set.ident = TRUE
+  )
+Idents(seurat_obj) <- "seurat_clusters"
+
+### Plot metadata
+plt1 <- DimPlot(seurat_obj, reduction = "umap", label = T)
+plt2 <- DimPlot(seurat_obj, reduction = "umap", group.by = "status")
+plt3 <- DimPlot(seurat_obj, reduction = "umap", group.by = "per.mito.bin")
+plt4 <- FeaturePlot(seurat_obj, features = "scDblFinder.scores")
+plt5 <- DimPlot(seurat_obj, reduction = "umap", group.by = "id")
+plt1 / plt2 / plt3 / plt5
+ggsave(paste0(proj_name, '_umap_other-meta.png'), units = 'in', width = 6, height = 30, dpi = 250)
+
+```
+
+
+```{r cell-abundances}
+
+### Find cell #/% in each cluster and right output
+
+count_per_cluster <- table(Idents(seurat_obj), seurat_obj@meta.data$status)
+percent_per_cluster <- prop.table(table(Idents(seurat_obj), seurat_obj@meta.data$status), margin = 2)
+
+count_per_cluster
+percent_per_cluster
+
+as.data.frame(percent_per_cluster) %>%
+  mutate(Percent = Freq * 100,
+         Cluster = Var1,
+         Condition = Var2) %>%
+  ggplot(., aes(Cluster, Percent, fill = Condition)) +
+  geom_bar(stat = 'identity', position = 'dodge') +
+  theme_classic()
+  ggsave(paste0(proj_name, '_percent_cell_in_cluster.png'), width = 8, height = 6)
+
+as.data.frame(prop.table(table(Idents(seurat_obj), seurat_obj@meta.data$status), margin = 1)) %>%
+    mutate(Percent = Freq * 100,
+         Cluster = Var1,
+         Condition = Var2) %>%
+  ggplot(., aes(Cluster, Percent, fill = Condition)) +
+  geom_bar(stat = 'identity') +
+  theme_classic()
+  ggsave(paste0(proj_name, '_percent_sample_in_cluster.png'), width = 8, height = 6)
+
+
+wb=createWorkbook()
+ws=addWorksheet(wb,'Cells per cluster')
+writeData(wb, ws, count_per_cluster, rowNames = F, colNames = T, startRow = 1,startCol = 1)
+ws=addWorksheet(wb,'Percent per cluster')
+writeData(wb, ws, percent_per_cluster, rowNames = F, colNames = T, startRow = 1,startCol = 1)
+saveWorkbook(wb, paste0(proj_name, '_cells_per_cluster.xlsx'), overwrite = T)
+
+```
+
+## Session info
+
+```{r session-info}
+
+sessionInfo()
+
+```
