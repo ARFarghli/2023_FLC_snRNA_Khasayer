@@ -429,6 +429,7 @@ seurat_obj <- RunUMAP(seurat_obj, reduction = "pca", dims = 1:30)
 seurat_obj <- FindNeighbors(seurat_obj, reduction = "pca", dims = 1:30)
 
 saveRDS(seurat_obj, "./neighbors-seurat-obj.rds")
+seurat_obj <- readRDS()
 
 dir.create("res_iter")
 
