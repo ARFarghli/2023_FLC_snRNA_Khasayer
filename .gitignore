@@ -1,0 +1,11 @@
+basename
+cellrangerCount
+prefix
+*.gz
+*.rds
+*.sh
+drive*
+extra
+FLC-*
+FLCT038
+soupx-adj-counts
