@@ -358,7 +358,7 @@ flc.combined.sct <- FindClusters(flc.combined.sct, resolution = 0.3)
 ```
 
 ```{r}
-# saveRDS(flc.combined.sct, paste0("decoupled-integration/rds/", proj_name, '_Neighbors.rds'))
+saveRDS(flc.combined.sct, paste0("rds/", proj_name, '_Neighbors.rds'))
 flc.combined.sct <- readRDS("decoupled-integration/rds/FLCvNML_Neighbors.rds")
 ```
 
@@ -446,7 +446,8 @@ harmonized.seurat <- FindClusters(harmonized.seurat, resolution = 0.1)
 ```
 
 ```{r}
-saveRDS(harmonized.seurat, paste0("decoupled-integration/rds/", proj_name, '_harmonized-byID-obj.rds'))
+saveRDS(harmonized.seurat, paste0("rds/", proj_name, '_harmonized-byID-obj.rds'))
+harmonized.seurat <- readRDS('rds/FLCvNML_harmonized-byID-obj.rds')
 ```
 
 ### Proportions
@@ -537,5 +538,26 @@ FeaturePlot(harmonized.seurat, features = c("VCAN", "SLC16A14", "PDE10A", "TMEM1
 
 ggsave(paste0("UMAPs/UMAPoverlays/", proj_name, "_FLC-markerGenes-featurePlots-integrated.png"), units = "in", width = 18, height = 10, dpi = 300)
 ```
+
+```{r}
+DimPlot(harmonized.seurat, reduction = "umap", split.by = "status")
+
+FeaturePlot(harmonized.seurat, features = c("VCAN", "SLC16A14", "PDE10A", "TMEM163", "OAT", "CA12", "BACE2", "COL4A1"), pt.size = 0.2,
+            split.by = "status",
+            ncol = 4)
+
+ggsave(paste0("UMAPs/UMAPoverlays/", proj_name, "_FLC-markerGenes-featurePlots-integrated-byStatus.png"), units = "in", width = 18, height = 50, dpi = 300)
 ```
 
+```{r}
+for (gene in c("VCAN", "SLC16A14", "PDE10A", "TMEM163", "OAT", "CA12", "BACE2", "COL4A1")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4)
+  ggsave(paste0("UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus.png"), units = "in", width = 18, height = 10, dpi = 300)
+}
+```
+
+## Session info
+
+```{r session-info}
+sessionInfo()
+```
