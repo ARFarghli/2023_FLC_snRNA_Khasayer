@@ -1,0 +1,259 @@
+---
+title: "FLC snRNA-seq clustering"
+author: "Alaa R. Farghli"
+date: "Last compiled on `r format(Sys.time(), '%d %B %Y')`"
+output:
+  html_document: 
+    toc: true
+    toc_float: true
+    theme: flatly
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load-libraries}
+library(Seurat)
+library(tidyverse)
+```
+
+# Single cell RNAseq analysis
+
+This is the continued single nuclei RNAseq analysis of FLC provided by the Khasayer lab.
+
+## Seurat analysis
+
+### Find markers
+
+```{r find-markers, warning=F, message=F}
+set.seed(1234)
+proj_name <- "FLCvNML"
+```
+
+```{r}
+harmonized.seurat <- readRDS('./fullDataset/rds/FLCvNML_harmonized-byID-obj.rds')
+```
+
+```{r}
+Idents(harmonized.seurat) <- "seurat_clusters"
+levels(harmonized.seurat)
+harmonized.seurat <- PrepSCTFindMarkers(harmonized.seurat)
+
+markers <- FindAllMarkers(harmonized.seurat, 
+                          assay = "RNA",
+                          min.pct = -Inf, 
+                          logfc.threshold = .5, 
+                          only.pos = T, 
+                          test.use = "wilcox",
+                          latent.vars = c('percent.mt', 'nFeature_RNA'))
+
+dir.create("./fullDataset/markers")
+markers <- markers %>%
+  filter(avg_log2FC > 0) %>%
+  write_csv(paste0("./fullDataset/markers", proj_name, '_HighlyEnrichedMarkers_logFC.5_wilcox-12cluster.csv'))
+markers <- read_csv(paste0("./fullDataset/markers", proj_name, '_HighlyEnrichedMarkers_logFC.5_wilcox-12cluster.csv'))
+head(markers)
+```
+
+## Determine and assign cell type
+
+### Overlap of cluster markers with markers of known cell types
+
+This is a custom function the checks the percent overlap between a marker gene list of a certain cell type with the markers of each cluster (as determined by the FindMarkers function).
+
+```{r functions}
+geneset_marker_overlap.f <- function(SerObj, enrichedGenes_df, known_markers, FC_thresh = 0, projname = 'proj', w = NULL, h = NULL, facet_ncol = 5, save_plot = T) {
+
+  ### Loop through each cluster and calculate the percentage of genes from each cell type in that cluster
+  #     above the FC_thresh using the output from finding highly enriched markers of each cluster
+  overlap_df <- data.frame()
+  for (i in sort(unique(Idents(SerObj)))) {
+    cat(paste0('\nCalculating geneset percentages for cluster ', i, '...'))
+    df_tmp <- enrichedGenes_df %>%
+      filter(cluster == i) %>%
+      filter(avg_log2FC > FC_thresh)
+
+    for (t in unique(sort(known_markers$type))) {
+
+      cell_type_markers <- known_markers %>%
+        filter(type == t) %>%
+        pull(gene) %>%
+        unique() %>%
+        as.vector()
+
+      per <- length(intersect(df_tmp$gene, cell_type_markers)) / length(cell_type_markers) * 100
+      genes <- intersect(df_tmp$gene, cell_type_markers)
+
+      overlap_df <- bind_rows(overlap_df, data.frame('Cluster' = i,
+                                                     'Type' = t,
+                                                     'Percent' = round(per, 2),
+                                                     'Overlap_genes' = paste(genes, collapse = '|'),
+                                                     'number_of_cluster_markers' = length(df_tmp$gene)))
+    }
+  }
+  cat('\n\n')
+  
+  ### Reformat the dataframe to be easier to read, write to csv, and return
+  overlap_df %>%
+    dplyr::select(Cell_Type = Type, everything()) %>%
+    write_csv(paste0(projname, '_FC', FC_thresh, '.csv'))
+
+  ### Refactor cluster so appear in numerical order
+  overlap_df <- overlap_df %>%
+    mutate(Cluster = factor(Cluster, levels = unique(Cluster)))
+
+  ### Create a bar plot to show the percent cell type cells present in each cluster
+  overlap_df <- overlap_df %>%
+    mutate(facet_name = paste0(Cluster, " (", number_of_cluster_markers, ")"))
+
+  overlap_df$facet_name <- reorder(overlap_df$facet_name, as.numeric(overlap_df$Cluster))
+
+  # Plot
+  g <- ggplot(overlap_df, aes(Type, Percent, alpha = Percent)) +
+          geom_bar(stat = 'identity', color = 'black') +
+          facet_wrap(~facet_name, ncol = facet_ncol, scales = 'free_y') +
+          scale_x_discrete(NULL) +
+          theme_bw() +
+          theme(text = element_text(size = 20),
+
+                axis.title = element_text(size = 18, face = 'bold'),
+                axis.text.y = element_text(size = 16, color = 'black'),
+                axis.text.x = element_text(size = 10, color = 'black', angle = 90, hjust = 1, vjust = .5),
+
+                strip.text = element_text(face = 'bold'),
+
+                panel.grid = element_blank())
+  
+  if (save_plot == T) {
+      filename = paste0(projname, '_FC', FC_thresh, '.png')
+      print(paste0('Saving percent image as: ', filename))
+
+
+
+  # Determine width and height
+  if (is.null(w)) {
+    w = min(10, length(unique(overlap_df$Cluster)) * 2 + 3.5)
+  }
+
+  if (is.null(h)) {
+    h = max(3, 2 * ceiling(length(unique(overlap_df$Cluster)) / 5))
+  }
+      
+      g
+      ggsave(filename, width = w, height = h)
+      
+  }
+
+
+  return(g)
+}
+```
+
+```{r cell-type-markers, fig.width=12, fig.height=8}
+dir.create("./fullDataset/cell_type_assignment")
+cell_marker_dir <- "./"
+
+## Haber
+cell_markers <- read_csv("./liverMarkers.csv") %>% 
+  dplyr::rename(type = cluster) %>% 
+  dplyr::rename(gene = name)
+
+geneset_marker_overlap.f(harmonized.seurat,
+                         markers,
+                         cell_markers,
+                         FC_thresh = .5, 
+                         projname = paste0("./fullDataset/cell_type_assignment/", proj_name, '_CTA_Macparland_13clusters'))
+
+# Non-core scRNA analysis code, specifically to check for FLC
+flc <- data.frame(type = "FLC", gene = c("MIR10B", "VCAN", "SLC16A14", "LINC00473", "MIR375", "PDE10A", "MARCH10", "FAM19A5", "FURIN", "EGFLAM", "PDE4B", "TMEM163", "OAT", "NOVA1", "TESC", "RPS6KA2", "CA12"))
+
+geneset_marker_overlap.f(harmonized.seurat,
+                         markers,
+                         flc,
+                         FC_thresh = .5, 
+                         projname = paste0("./fullDataset/cell_type_assignment/", proj_name, '_CTA_FLC_13clusters'))
+```
+
+### Cumulative expression of cell type marker list across clusters
+
+For a list of cell type markers, calculate a expression score for each cluster. An in-depth explaination of what is happening in the AddModuleScore function can be found in a [blog post by Walter Muskovic](https://www.waltermuskovic.com/2021/04/15/seurat-s-addmodulescore-function/).
+
+```{r module-expression, warning=F}
+# We create a temporary Seurat object here to avoid over populating our metadata with these scores
+harmonized.seurat_tmp <- harmonized.seurat
+
+## Haber
+cell_markers <- read_csv("./liverMarkers.csv") %>% 
+  dplyr::rename(type = cluster) %>% 
+  dplyr::rename(gene = name)
+
+goi_li <- split(cell_markers$gene, cell_markers$type)
+harmonized.seurat_tmp <- AddModuleScore(object = harmonized.seurat, features = goi_li, name = "MarkerList")
+
+DotPlot(harmonized.seurat_tmp, features = paste0("MarkerList", seq(1, length(goi_li)))) +  
+  scale_x_discrete(NULL,
+                   labels = names(goi_li)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = .5, hjust = 1))
+
+ggsave(paste0("./fullDataset/cell_type_assignment/", proj_name, "_DP-CTA_Macparland-module.png"), units = "in", width = 2 + length(goi_li) * .75, height = 8)
+
+## IEL
+cell_markers <- data.frame(type = "FLC", gene = c("MIR10B", "VCAN", "SLC16A14", "LINC00473", "MIR375", "PDE10A", "MARCH10", "FAM19A5", "FURIN", "EGFLAM", "PDE4B", "TMEM163", "OAT", "NOVA1", "TESC", "RPS6KA2", "CA12"))
+
+goi_li <- split(cell_markers$gene, cell_markers$type)
+harmonized.seurat_tmp <- AddModuleScore(object = harmonized.seurat_tmp, features = goi_li, name = "MarkerList")
+
+DotPlot(harmonized.seurat_tmp, features = paste0("MarkerList", seq(1, length(goi_li)))) + 
+  scale_x_discrete(NULL,
+                   labels = names(goi_li)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = .5, hjust = 1))
+
+ggsave(paste0("./fullDataset/cell_type_assignment/", proj_name, "_DP-CTA_FLC.png"), units = "in", width = 3 + length(goi_li) * .75, height = 8)
+```
+
+### Assign cell types
+
+Based on the results of the overlap analysis and the module expression scores, we can assign cell types. This is curated manually and saved as a <name>_cluster_assignment.csv file.
+
+
+```{r cell-type-assignment}
+cluster_ass <- read_csv(paste0(proj_name, '_cluster_assignment.csv')) %>%
+  mutate(cluster_assignment = paste(cluster, assignment, sep = "_"))
+
+seurat_obj[["cluster_id_named"]] <- plyr::mapvalues(Idents(seurat_obj),
+                                                    from=cluster_ass$cluster,
+                                                    to=cluster_ass$cluster_assignment)
+
+new.cluster.ids <- cluster_ass$assignment
+names(new.cluster.ids) <- levels(seurat_obj)
+seurat_obj <- RenameIdents(seurat_obj, new.cluster.ids)
+
+seurat_obj[["cluster_named"]] <- Idents(seurat_obj)
+
+
+DimPlot(seurat_obj, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend()
+ggsave(paste0(proj_name, "_umap_clusterNamed.png"), units = 'in', width = 6, height = 6, dpi = 250)
+
+
+# Save a cluster named and a cluster named without immune
+saveRDS(seurat_obj, paste0("./full" proj_name, '_seurat-obj.rds'))
+```
+
+### Find markers of named clusters
+
+```{r find-markers-named, warning=F}
+
+markers <- FindAllMarkers(seurat_obj, 
+                          min.pct = -Inf, 
+                          logfc.threshold = .25, 
+                          only.pos = T, 
+                          test.use = "wilcox",
+                          latent.vars = c('percent.mt', 'nFeature_RNA'))
+
+markers <- markers %>%
+  filter(avg_log2FC > 0) %>%
+  write_csv(paste0("./fullDataset/cell_type_assignment/", proj_name, '_HighlyEnrichedMarkers_CLUSTERNAMED_logFC.25.csv'))
+
+```
