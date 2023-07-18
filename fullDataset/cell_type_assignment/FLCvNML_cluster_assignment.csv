@@ -1,6 +1,6 @@
 ﻿cluster,assignment
 0,Epithelial 1
-1,Endothelial 1
+1,Endothelial
 2,Epithelial 2
 3,Stellate
 4,Epithelial 3
@@ -10,5 +10,5 @@
 8,Macrophages
 9,Epithelial 6
 10,Lymphocytes
-11,Endothelial 2
+11,Endothelial
 12,Unknown
