@@ -1,14 +1,12 @@
-﻿cluster,assignment
-0,Epithelial 1
-1,Endothelial
-2,Epithelial 2
-3,Stellate
-4,Epithelial 3
-5,Epithelial 4
-6,Epithelial 5
-7,Cholangiocytes
-8,Macrophages
-9,Epithelial 6
-10,Lymphocytes
-11,Endothelial
-12,Unknown
+cluster	assignment
+0	Epithelial 1
+1	Endothelial
+2	Epithelial 2
+3	Stellate
+4	Lymphocyte
+5	Epithelial 3
+6	Erythroid 
+7	Cholangiocyte
+8	Macrophages
+9	Lymphocyte 2
+10	Cholangiocyte
