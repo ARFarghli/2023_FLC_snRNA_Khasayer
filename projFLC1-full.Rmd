@@ -9,6 +9,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r load-libraries}
+# library(Matrix)
 library(stringr)
 library(Seurat)
 library(tidyverse)
@@ -18,9 +19,16 @@ library(BiocParallel)
 # BiocManager::install("glmGamPoi")
 ```
 
+```{r}
+install.packages('installr')
+library(installr)
+install.Rtools()
+install.packages('Matrix')
+library(Matrix)
+```
+
 ```{r set project}
 set.seed(1234)
-
 proj_name <- "FLCvNML"
 ```
 
@@ -152,7 +160,7 @@ T014[["id"]] <- "T014"
 T015[["id"]] <- "T015"
 T021[["id"]] <- "T021"
 T034[["id"]] <- "T034"
-T038[["id"]] <- "T034"
+T038[["id"]] <- "T038"
 
 N008
 N014
@@ -190,7 +198,7 @@ dir.create("./fullDataset/rds")
 
 ```{r Run scDoubletFinder}
 dir.create("./fullDataset/csv")
-bp <- MulticoreParam(60, RNGseed=1234)
+bp <- MulticoreParam(80, RNGseed=1234)
 bpstart(bp)
 sce <- scDblFinder(sce, 
                    samples="id", 
@@ -226,10 +234,10 @@ for (i in 1:length(singlet_cell_id)) {
 ```
 
 ```{r}
-# saveRDS(sce, "./fullDataset/rds/sce.rds")
-# saveRDS(alldata, "./fullDataset/rds/alldata.rds")
-sce <- readRDS("./fullDataset/rds/sce.rds")
-alldata <- readRDS("./fullDataset/rds/alldata.rds")
+saveRDS(sce, "./fullDataset/rds/sce.rds")
+saveRDS(alldata, "./fullDataset/rds/alldata.rds")
+# sce <- readRDS("./fullDataset/rds/sce.rds")
+# alldata <- readRDS("./fullDataset/rds/alldata.rds")
 ```
 
 ```{r}
@@ -300,7 +308,7 @@ for (i in 1:length(obj.list)) {
 ```
 
 ```{r after doublet remover}
-[1] "N008"
+"N008"
 [1] "Number of cells: 21713"
 [1] "Number of cells: 18130"
 [1] " "
@@ -332,64 +340,64 @@ for (i in 1:length(obj.list)) {
 [1] "Number of cells: 29013"
 [1] "Number of cells: 24322"
 [1] " "
-[1] "T015"
+[1] "T021"
 [1] "Number of cells: 19214"
 [1] "Number of cells: 16965"
 [1] " "
 [1] "T034"
 [1] "Number of cells: 24953"
-[1] "Number of cells: 20716"
+[1] "Number of cells: 21607"
 [1] " "
 [1] "T038"
 [1] "Number of cells: 5026"
-[1] "Number of cells: 4562"
+[1] "Number of cells: 4657"
 [1] " "
 ```
 
 ```{r after filtering}
 [1] "N008"
-[1] "Number of cells: 18163"
-[1] "Number of cells: 14531"
+[1] "Number of cells: 18130"
+[1] "Number of cells: 14503"
 [1] " "
 [1] "N014"
-[1] "Number of cells: 14671"
-[1] "Number of cells: 6634"
+[1] "Number of cells: 14662"
+[1] "Number of cells: 6625"
 [1] " "
 [1] "N015"
-[1] "Number of cells: 14723"
-[1] "Number of cells: 12786"
+[1] "Number of cells: 14426"
+[1] "Number of cells: 12491"
 [1] " "
 [1] "N021"
-[1] "Number of cells: 17925"
-[1] "Number of cells: 14412"
+[1] "Number of cells: 17637"
+[1] "Number of cells: 14132"
 [1] " "
 [1] "T005"
-[1] "Number of cells: 22238"
-[1] "Number of cells: 14112"
+[1] "Number of cells: 22116"
+[1] "Number of cells: 14172"
 [1] " "
 [1] "T008"
-[1] "Number of cells: 19141"
-[1] "Number of cells: 10825"
+[1] "Number of cells: 18612"
+[1] "Number of cells: 10388"
 [1] " "
 [1] "T014"
-[1] "Number of cells: 23724"
-[1] "Number of cells: 14670"
+[1] "Number of cells: 23717"
+[1] "Number of cells: 14875"
 [1] " "
 [1] "T015"
-[1] "Number of cells: 24188"
-[1] "Number of cells: 18322"
+[1] "Number of cells: 24322"
+[1] "Number of cells: 18475"
 [1] " "
 [1] "T021"
-[1] "Number of cells: 17220"
-[1] "Number of cells: 9659"
+[1] "Number of cells: 16965"
+[1] "Number of cells: 9494"
 [1] " "
 [1] "T034"
-[1] "Number of cells: 20992"
-[1] "Number of cells: 10495"
+[1] "Number of cells: 21607"
+[1] "Number of cells: 11081"
 [1] " "
 [1] "T038"
-[1] "Number of cells: 4424"
-[1] "Number of cells: 3301"
+[1] "Number of cells: 4657"
+[1] "Number of cells: 3523"
 [1] " "
 ```
 
@@ -412,7 +420,7 @@ newdata <- merge(N008, y = c(N014, N015, N021,
                                   "T005", "T008", "T014", "T015", "T021", "T034", "T038"),
                  project = "fullFLC")
 saveRDS(newdata, "./fullDataset/rds/newcombineddata.rds")
-newdata <- readRDS("./fullDataset/rds/newcombineddata.rds")
+# newdata <- readRDS("./fullDataset/rds/newcombineddata.rds")
 ```
 
 ```{r}
@@ -448,32 +456,32 @@ for (i in seq(.05, .5, by = .05)) {
 nml <- FindClusters(nml, resolution = 0.2)
 DefaultAssay(nml) <- "SCT"
 
-# saveRDS(nml, paste0("./fullDataset/rds/", proj_name, '_nml-obj.rds'))
-# nml <- readRDS("rds/FLCvNMLnml-obj.rds")
+saveRDS(nml, paste0("./fullDataset/rds/", proj_name, '_nml-obj.rds'))
+nml <- readRDS("rds/FLCvNMLnml-obj.rds")
 ```
 
 ```{r}
 flc <- SCTransform(flc, vst.flavor = "v2", verbose = FALSE) %>%
     RunPCA(npcs = 30, verbose = FALSE)
-# saveRDS(flc, paste0("./fullDataset/rds/", proj_name, '_flc-obj.rds'))
-# flc <- readRDS("./fullDataset/rds/FLCvNML_flc-obj.rds")
+saveRDS(flc, paste0("./fullDataset/rds/", proj_name, '_flc-obj.rds'))
+flc <- readRDS("./fullDataset/rds/FLCvNML_flc-obj.rds")
 flc.list <- list(nml = nml, flc = flc)
 features <- SelectIntegrationFeatures(object.list = flc.list, nfeatures = 3000)
 flc.list <- PrepSCTIntegration(object.list = flc.list, anchor.features = features)
-# saveRDS(flc.list, paste0("./fullDataset/rds/", proj_name, '_PrepSCTInt-obj.rds'))
+saveRDS(flc.list, paste0("./fullDataset/rds/", proj_name, '_PrepSCTInt-obj.rds'))
 # flc.list <- readRDS("rds/FLCvNML_PrepSCTInt-obj.rds")
 ```
 
 ```{r}
 flc.anchors <- FindIntegrationAnchors(object.list = flc.list, normalization.method = "SCT",
     anchor.features = features)
-# saveRDS(flc.anchors, paste0("./fullDataset/rds/", proj_name, '_FLCanchors-obj.rds'))
+saveRDS(flc.anchors, paste0("./fullDataset/rds/", proj_name, '_FLCanchors-obj.rds'))
 # flc.anchors <- readRDS("./fullDards/FLCvNML_FLCanchors-obj.rds")
 ```
 
 ```{r}
 flc.combined.sct <- IntegrateData(anchorset = flc.anchors, normalization.method = "SCT")
-# saveRDS(flc.combined.sct, paste0("./fullDataset/rds/", proj_name, '_integratedData-obj.rds'))
+saveRDS(flc.combined.sct, paste0("./fullDataset/rds/", proj_name, '_integratedData-obj.rds'))
 # flc.combined.sct <- readRDS("decoupled-integration/rds/FLCvNML_integratedData-obj.rds")
 ```
 
@@ -485,7 +493,7 @@ flc.combined.sct <- FindClusters(flc.combined.sct, resolution = 0.3)
 ```
 
 ```{r}
-# saveRDS(flc.combined.sct, paste0("./fullDataset/rds/", proj_name, '_Neighbors.rds'))
+saveRDS(flc.combined.sct, paste0("./fullDataset/rds/", proj_name, '_Neighbors.rds'))
 flc.combined.sct <- readRDS("./fullDataset/rds/FLCvNML_Neighbors.rds")
 ```
 
@@ -565,12 +573,12 @@ for (i in seq(.05, .3, by = .05)) {
   ggsave(paste0("./fullDataset/UMAPs/res-iter/harmony/", proj_name, '_res-iter_', i, '_umap-scTransform-Harmonized.png'), units = 'in', width = 6, height = 5, dpi = 250)
 }
 
-harmonized.seurat <- FindClusters(harmonized.seurat, resolution = 0.2)
+harmonized.seurat <- FindClusters(harmonized.seurat, resolution = 0.15)
 ```
 
 ```{r}
 saveRDS(harmonized.seurat, paste0("./fullDataset/rds/", proj_name, '_harmonized-byID-obj.rds'))
-# harmonized.seurat <- readRDS('./fullDrds/FLCvNML_harmonized-byID-obj.rds')
+harmonized.seurat <- readRDS('./fullDataset/rds/FLCvNML_harmonized-byID-obj.rds')
 ```
 
 ```{r cell-abundances}
@@ -647,14 +655,16 @@ ggsave(paste0("./fullDataset/UMAPs/UMAPoverlays/", proj_name, "_FLC-markerGenes-
 ```
 
 ```{r}
-for (gene in c("VCAN", "SLC16A14", "PDE10A", "TMEM163", "OAT", "CA12", "BACE2", "COL4A1")) {
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("VCAN", "SLC16A14", "PDE10A", "TMEM163", "OAT", "CA12", "BACE2", "COL4A1", "CA12", "PDGFB", "PDGFRB", "TGFB3", "TGFBR2", "TGFB3", "TGFBR1", "KLF4", "WNT4", "FZD10", "BACE2", "FAM167A", "GPRIN3", "IRF4", "KIF26B", "PDE10A")) {
   FeaturePlot(harmonized.seurat, 
               features = gene, 
               pt.size = 0.2, 
               split.by = "status", 
               ncol = 4,
-              raster = FALSE)
-  ggsave(paste0("./fullDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus.png"), units = "in", width = 18, height = 10, dpi = 300)
+              raster = FALSE,
+              label = TRUE)
+  ggsave(paste0("./fullDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-named.png"), units = "in", width = 18, height = 10, dpi = 300)
 }
 ```
 
@@ -663,6 +673,22 @@ DefaultAssay(harmonized.seurat) <- "SCT"
 for (gene in c("GLI1", "GLI2", "GLI3", "BAG2", "STIP1")) {
   FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4, label = TRUE)
   ggsave(paste0("UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-named.png"), units = "in", width = 18, height = 10, dpi = 300)
+}
+```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("SOX17")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4, label = TRUE)
+  ggsave(paste0("./fullDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-named.png"), units = "in", width = 18, height = 10, dpi = 300)
+}
+```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("VEGFA")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4, label = TRUE)
+  ggsave(paste0("./fullDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-named.png"), units = "in", width = 18, height = 10, dpi = 300)
 }
 ```
 

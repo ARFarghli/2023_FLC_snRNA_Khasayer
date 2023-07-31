@@ -1,0 +1,56 @@
+---
+title: "Cell chat analysis"
+output: html_document
+date: "2023-07-18"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load-libraries}
+library(Seurat)
+library(tidyverse)
+library(CellChat)
+library(patchwork)
+options(stringsAsFactors = FALSE)
+```
+
+```{r}
+labels <- Idents(harmonized.seurat)
+meta <- data.frame(group = labels, row.names = names(labels))
+```
+
+```{r Create a CellChat object}
+cellchat <- createCellChat(object = harmonized.seurat)
+```
+
+```{r Add cell information into meta slot of the object}
+cellchat <- addMeta(cellchat, meta = meta, meta.name = "group")
+cellchat <- setIdent(cellchat, ident.use = "group") # set "labels" as default cell identity
+levels(cellchat@idents) # show factor levels of the cell labels
+groupSize <- as.numeric(table(cellchat@idents))
+```
+
+```{r Set the ligand-receptor interaction database}
+CellChatDB <- CellChatDB.human # use CellChatDB.mouse if running on mouse data
+showDatabaseCategory(CellChatDB)
+```
+```{r}
+dplyr::glimpse(CellChatDB$interaction)
+CellChatDB.use <- subsetDB(CellChatDB, search = "Secreted Signaling") # use Secreted Signaling
+cellchat@DB <- CellChatDB.use
+```
+
+```{r Preprocessing the expression data for cell-cell communication analysis}
+# subset the expression data of signaling genes for saving computation cost
+cellchat <- subsetData(cellchat) # This step is necessary even if using the whole database
+future::plan("multisession", workers = 40) # do parallel
+cellchat <- identifyOverExpressedGenes(cellchat)
+cellchat <- identifyOverExpressedInteractions(cellchat)
+cellchat <- projectData(cellchat, PPI.human)
+saveRDS(cellchat, "./fullDataset/rds/scRNA_full_cellchat.rds")
+```
+
+
+

@@ -1,0 +1,33 @@
+---
+title: "Cluster profiler for GO and KEGG analysis"
+output: html_document
+date: "2023-07-26"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(clusterProfiler)
+library(dplyr)
+library(ggplot2)
+library(reshape2)
+library(treemapify)
+library(Seurat)
+library(tidyverse)
+```
+
+```{r find-markers, warning=F, message=F}
+set.seed(1234)
+proj_name <- "FLCvNML"
+```
+
+```{r}
+harmonized.seurat <- readRDS('./fullDataset/rds/FLCvNML_harmonized-byID-obj.rds')
+```
+
+```{r}
+
+```
+

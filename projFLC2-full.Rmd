@@ -17,6 +17,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r load-libraries}
 library(Seurat)
 library(tidyverse)
+library(MAST)
 ```
 
 # Single cell RNAseq analysis
@@ -34,6 +35,7 @@ proj_name <- "FLCvNML"
 
 ```{r}
 harmonized.seurat <- readRDS('./fullDataset/rds/FLCvNML_harmonized-byID-obj.rds')
+harmonized.seurat <- readRDS('./fullDataset/rds/FLCvNML_Named-obj.rds')
 ```
 
 ```{r}
@@ -46,14 +48,14 @@ markers <- FindAllMarkers(harmonized.seurat,
                           min.pct = -Inf, 
                           logfc.threshold = .5, 
                           only.pos = T, 
-                          test.use = "wilcox",
+                          test.use = "MAST",
                           latent.vars = c('percent.mt', 'nFeature_RNA'))
 
 dir.create("./fullDataset/markers")
 markers <- markers %>%
   filter(avg_log2FC > 0) %>%
-  write_csv(paste0("./fullDataset/markers", proj_name, '_HighlyEnrichedMarkers_logFC.5_wilcox-12cluster.csv'))
-markers <- read_csv(paste0("./fullDataset/markers", proj_name, '_HighlyEnrichedMarkers_logFC.5_wilcox-12cluster.csv'))
+  write_csv(paste0("./fullDataset/markers", proj_name, '_HighlyEnrichedMarkers_logFC.5_MAST-11cluster.csv'))
+markers <- read_csv(paste0("./fullDataset/markers", proj_name, '_HighlyEnrichedMarkers_logFC.5_MAST-11cluster.csv'))
 head(markers)
 ```
 
@@ -164,7 +166,7 @@ geneset_marker_overlap.f(harmonized.seurat,
                          markers,
                          cell_markers,
                          FC_thresh = .5, 
-                         projname = paste0("./fullDataset/cell_type_assignment/", proj_name, '_CTA_Macparland_13clusters'))
+                         projname = paste0("./fullDataset/cell_type_assignment/", proj_name, '_CTA_Macparland_11clusters_MAST'))
 
 # Non-core scRNA analysis code, specifically to check for FLC
 flc <- data.frame(type = "FLC", gene = c("MIR10B", "VCAN", "SLC16A14", "LINC00473", "MIR375", "PDE10A", "MARCH10", "FAM19A5", "FURIN", "EGFLAM", "PDE4B", "TMEM163", "OAT", "NOVA1", "TESC", "RPS6KA2", "CA12"))
@@ -173,7 +175,7 @@ geneset_marker_overlap.f(harmonized.seurat,
                          markers,
                          flc,
                          FC_thresh = .5, 
-                         projname = paste0("./fullDataset/cell_type_assignment/", proj_name, '_CTA_FLC_13clusters'))
+                         projname = paste0("./fullDataset/cell_type_assignment/", proj_name, '_CTA_FLC_11clusters_MAST'))
 ```
 
 ### Cumulative expression of cell type marker list across clusters
@@ -197,7 +199,7 @@ DotPlot(harmonized.seurat_tmp, features = paste0("MarkerList", seq(1, length(goi
                    labels = names(goi_li)) +
   theme(axis.text.x = element_text(angle = 90, vjust = .5, hjust = 1))
 
-ggsave(paste0("./fullDataset/cell_type_assignment/", proj_name, "_DP-CTA_Macparland-module.png"), units = "in", width = 2 + length(goi_li) * .75, height = 8)
+ggsave(paste0("./fullDataset/cell_type_assignment/", proj_name, "_DP-CTA_Macparland-module_MAST-11clusters.png"), units = "in", width = 2 + length(goi_li) * .75, height = 8)
 
 ## IEL
 cell_markers <- data.frame(type = "FLC", gene = c("MIR10B", "VCAN", "SLC16A14", "LINC00473", "MIR375", "PDE10A", "MARCH10", "FAM19A5", "FURIN", "EGFLAM", "PDE4B", "TMEM163", "OAT", "NOVA1", "TESC", "RPS6KA2", "CA12"))
@@ -210,7 +212,7 @@ DotPlot(harmonized.seurat_tmp, features = paste0("MarkerList", seq(1, length(goi
                    labels = names(goi_li)) +
   theme(axis.text.x = element_text(angle = 90, vjust = .5, hjust = 1))
 
-ggsave(paste0("./fullDataset/cell_type_assignment/", proj_name, "_DP-CTA_FLC.png"), units = "in", width = 3 + length(goi_li) * .75, height = 8)
+ggsave(paste0("./fullDataset/cell_type_assignment/", proj_name, "_DP-CTA_FLC_MAST-11clusters.png"), units = "in", width = 3 + length(goi_li) * .75, height = 8)
 ```
 
 ### Assign cell types
@@ -219,33 +221,35 @@ Based on the results of the overlap analysis and the module expression scores, w
 
 
 ```{r cell-type-assignment}
-cluster_ass <- read_csv(paste0(proj_name, '_cluster_assignment.csv')) %>%
+cluster_ass <- read_csv(paste0("./fullDataset/cell_type_assignment/", proj_name, '_cluster_assignment.csv')) %>%
   mutate(cluster_assignment = paste(cluster, assignment, sep = "_"))
 
-seurat_obj[["cluster_id_named"]] <- plyr::mapvalues(Idents(seurat_obj),
+harmonized.seurat[["cluster_id_named"]] <- plyr::mapvalues(Idents(harmonized.seurat),
                                                     from=cluster_ass$cluster,
                                                     to=cluster_ass$cluster_assignment)
 
 new.cluster.ids <- cluster_ass$assignment
-names(new.cluster.ids) <- levels(seurat_obj)
-seurat_obj <- RenameIdents(seurat_obj, new.cluster.ids)
+names(new.cluster.ids) <- levels(harmonized.seurat)
+harmonized.seurat <- RenameIdents(harmonized.seurat, new.cluster.ids)
 
-seurat_obj[["cluster_named"]] <- Idents(seurat_obj)
+harmonized.seurat[["cluster_named"]] <- Idents(harmonized.seurat)
 
 
-DimPlot(seurat_obj, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend()
-ggsave(paste0(proj_name, "_umap_clusterNamed.png"), units = 'in', width = 6, height = 6, dpi = 250)
+DimPlot(harmonized.seurat, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend()
+ggsave(paste0("./fullDataset/UMAPs/metadata/harmony/", proj_name, "_umap_clusterNamed.png"), units = 'in', width = 6, height = 6, dpi = 250)
+DimPlot(harmonized.seurat, reduction = "umap", split.by = "status", label = TRUE, pt.size = 0.5) + NoLegend()
+ggsave(paste0("./fullDataset/UMAPs/metadata/harmony/", proj_name, "_umap_clusterNamed-split.png"), units = 'in', width = 10, height = 6, dpi = 250)
 
 
 # Save a cluster named and a cluster named without immune
-saveRDS(seurat_obj, paste0("./full" proj_name, '_seurat-obj.rds'))
+saveRDS(harmonized.seurat, paste0("./fullDataset/rds/", proj_name, '_Named-obj.rds'))
 ```
 
 ### Find markers of named clusters
 
 ```{r find-markers-named, warning=F}
 
-markers <- FindAllMarkers(seurat_obj, 
+markers <- FindAllMarkers(harmonized.seurat, 
                           min.pct = -Inf, 
                           logfc.threshold = .25, 
                           only.pos = T, 

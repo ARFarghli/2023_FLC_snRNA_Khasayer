@@ -1,0 +1,289 @@
+---
+title: "gene expression heatmap"
+output: html_document
+date: "2023-05-03"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load-libraries}
+library(Seurat)
+library(tidyverse)
+library(pheatmap)
+library(RColorBrewer)
+library(grid)
+
+# devtools::install_github("elliefewings/DoMultiBarHeatmap")
+```
+
+
+```{r Set seed and proj name}
+set.seed(1234)
+proj_name <- "FLCvNML"
+```
+
+```{r}
+harmonized.seurat <- readRDS(paste0("rds/", proj_name, '_harmonized-byID-obj.rds'))
+Idents(harmonized.seurat) <- "seurat_clusters"
+levels(harmonized.seurat)
+```
+
+```{r}
+new.cluster.ids <- c("Epithelial 1", #0
+  "Epithelial 2", #1
+  "Epithelial 1", #2
+  "Endothelial", #3
+  "Stellate", #4
+  "Epithelial 3", #5
+  "Epithelial 1",  #6
+  "Macrophages",  #7
+  "Lymphocytes",  #8
+  "Epithelial 1",  #9
+  "Unknown", #10
+  "Unknown") #11
+  
+names(new.cluster.ids) <- levels(harmonized.seurat)
+harmonized.seurat <- RenameIdents(harmonized.seurat, new.cluster.ids)
+table(harmonized.seurat@active.ident)
+```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+flc.list <- SplitObject(harmonized.seurat, split.by = "status")
+nml <- flc.list[["NML"]]
+flc <- flc.list[["FLC"]]
+```
+
+```{r}
+metab.switch.gly <- c("G6PC", "PCK1", "ACSS3", "FBP1", "CYP2E1", "ALDH1B1", "ADH5", "ALDOB", "ALDH3A2", "ALDH9A1", "PANK1", "PFKL", "PC", "ALDH7A1", "CAT", "ALDH2", "ADH1C", "GCK", "ADH1B", "PCK2", "SLC2A2", "ADH6", "PKLR", "ADH1A", "ADH4", "SLC2A2",  "ALDOA", "PFKM", "GPD2", "MDH2", "PKM", "PDHX", "GAPDH", "PKM", "GAPDH", "ALDH1A3", "PFKFB3", "SLC2A4", "ACYP2", "PGM5", "FBP2", "PGM1", "ACSS2", "ENO3", "HK2") %>% sort()
+
+sug.trans <- c("SLC2A4", "SLC2A1", "SLC2A6", "SLC2A14", "SLC2A2", "SLC2A13", "SLC2A10", "SLC2A8") %>% sort()
+
+pyruvate.cent <- c("SDS", "SLC16A3", "LDHB", "CTH", "PCK1", "ACLY", "PKM", "PKM", "SLC25A11", "LDHA", "ACO1", "SLC25A1", "SLC13A5", "IDH1", "SLC16A7", "SLC16A1", "SFXN5", "PKLR") %>% sort()
+
+proline.prod <- c("PYCR1", "PYCR2", "PYCR3", "PRODH", "PRODH2", "P4HA1", "P4HA2") %>% sort()
+
+oat.nexus <- c("GLS", "GLS2", "OAT", "OTC", "ARG2", "ALDH18A1", "ALDH4A1", "GLUL", "CPS1", "CAD", "DHODH", "GLUD1", "GLUD2") %>% sort()
+
+fa.trans <- c("SLC27A1", "SLC27A2", "SLC27A5", "SLC27A4", "SLC27A3", "CD36", "GOT2", "ACSL3", "ACSL4", "ACSL5", "ACSL6") %>% sort()
+
+aa.trans <- c("SLC7A5", "SLC7A2", "SLC1A2", "SLC3A2", "SLC36A4", "SLC38A2", "SLC17A5", "SLC38A7", "SLC1A5", "SLC43A1", "SLC1A1", "SLC38A4") %>% sort()
+                  
+cal.homeo <- c("SLC25A3", "LETM1", "SLC25A4", "VDAC1", "PPIF", "SLC25A5", "SLC25A12", "SLC25A13", "SMDT1", "SLC25A25", "VDAC3", "SLC25A24", "SLC25A31", "RHOT2", "MCU", "SLC25A23", "RHOT1", "MICU2", "MCUB", "MICU1", "MICU3", "SLC25A6", "SLC8B1", "EFHD1") %>% sort()
+
+tca <- c("SDHB", "SDHA", "OGDH", "SDHD", "MDH2", "CS", "DLST", "MPC2", "FH", "SUCLA2", "IDH3A", "IDH3B", "SUCLG1", "ABHD11", "DLD", "ACO2", "IDH3G", "SDHC", "OGDHL", "SLC25A11", "SUCLG2", "SLC25A1", "L2HGDH", "ME3", "IDH2", "MPC1L", "PC", "ME2", "MPC1", "FAHD1", "SFXN5", "ACLY", "PCK2", "D2HGDH", "MRPS36", "PDHA1", "PDHB", "PDK4", "DLAT", "PDHX", "MPC2", "DLD", "PDK2", "PDK1", "PDK3", "MPC1L", "MPC1", "PDP1", "PDPR", "PDHA2", "PDP2", "VDAC1", "VDAC2", "VDAC3") %>% sort()
+
+mito.import <- c("UQCRC1", "PMPCB", "UQCRC2", "GRPEL1", "PMPCA", "TIMM10", "AFG3L2", "LONP1", "AIFM1", "TIMM9", "SAMM50", "PHB", "TIMM13", "TIMM44", "CLPP", "CLPX", "PITRM1", "TIMM8B", "PHB2", "MTX2", "TIMM50", "TOMM7", "TOMM40L", "HSPD1", "MIPEP", "CLPB", "MTX1", "TIMM17A", "TRAP1", "TIMM22", "TOMM22", "DNAJA3", "AFG1L", "TIMM21", "STOML2", "LACTB", "TOMM40", "DNAJC11", "SPG7", "ATAD1", "TIMM17B", "TIMM23", "DNLZ", "CHCHD4", "TIMM8A", "IDE", "HSPE1", "XPNPEP3", "TIMM10B", "LAP3", "ROMO1", "DNAJC15", "MAIP1", "OXA1L", "PDF", "NLN", "GRPEL2", "GFER", "IMMP2L", "YME1L1", "IMMP1L", "ATP23", "TOMM6", "TOMM70", "OMA1", "TOMM5", "HTRA2", "PARL", "DNAJC4", "PAM16", "TIMM29", "NRDC", "METAP1D", "DNAJC19", "MUL1", "TOMM20", "PARK7", "USP30", "TOMM20L", "CASP9", "AGK", "TOMM34", "CASP8", "FKBP10", "CASP3", "PRSS35") %>% sort()
+
+etc.assem <- c("SDHAF4", "COX11", "HIGD2A", "COX15", "AIFM1", "SURF1", "SDHAF2", "COX17", "UQCC1", "ATPAF2", "COA6", "NDUFAF4", "CMC2", "SDHAF1", "NDUFAF5", "TACO1", "BCS1L", "CMC1", "NDUFAF1", "LYRM7", "TMEM126A", "COX14", "TIMM21", "SCO1", "COA5", "ACAD9", "COX16", "SCO2", "COX10", "TMEM70", "FMC1", "NDUFAF6", "SDHAF3", "NDUFAF7", "COA3", "NUBPL", "LYRM2", "HIGD1A", "COX19", "COA8", "ATPAF1", "COX18", "NDUFAF8", "TTC19", "NDUFAF2", "ECSIT", "TIMMDC1", "COA4", "TMEM126B", "COX20", "COX7A2L", "TMEM177", "PET100", "NDUFAF3", "TMEM186", "DMAC2", "PNKD", "SMIM20", "FOXRED1", "PET117", "COA7", "COA1", "UQCC2", "UQCC3", "RAB5IF", "DMAC1", "ATPSCKMT", "CEP89") %>% sort()
+
+etc <- c("CYC1", "SDHB", "SDHA", "UQCRC1", "ATP5F1D", "COX5A", "UQCRFS1", "ATP5F1A", "UQCRC2", 
+ "SDHD", "UQCRQ", "NDUFS1", "ATP5F1E", "ATP5F1B", "UQCR10", "UQCRH", "ATP5PO", "COX6A1", 
+ "NDUFS7", "ATP5ME", "NDUFV2", "ATP5PF", "NDUFB8", "NDUFS8", "NDUFS2", "NDUFV1", "SDHC",  
+ "NDUFB5", "COX6C", "NDUFB9", "NDUFA6", "COX6B1", "NDUFS4", "NDUFA9", "ATP5F1C", "COX4I1", 
+ "NDUFS6", "COX5B", "NDUFA5", "NDUFB6", "NDUFB10", "NDUFA2", "NDUFS5", "CYCS", "COX7A2",
+ "HCCS", "NDUFA7", "NDUFB2", "ATP5IF1", "ATP5PB", "COX7C", "COX7A1", "NDUFA12", "NDUFA10",
+ "NDUFC2", "MT-ATP6", "MT-CO2", "NDUFA8", "NDUFB11", "NDUFV3", "UQCRB", "ATP5PD", "ATP5MG", 
+ "ATP5MC3", "COX6A2", "NDUFAB1", "NDUFS3", "NDUFB7", "COX8A", "NDUFC1", "NDUFA3", "NDUFB3",
+ "NDUFA4", "NDUFA13", "COX7B", "NDUFA11", "ATP5MPL", "COX6B2", "COX4I2", "ATP5MF", "COX8C", 
+ "MT-CO1", "MT-ND2", "MT-ND4", "MT-ND5", "NDUFB4", "UQCR11", "NDUFA1", "MT-CYB", "MT-ATP8",
+ "MT-CO3", "MT-ND3", "ATP5MC1", "ATP5MC2", "MT-ND1", "DMAC2L", "ATP5MD", "COX7B2", "MT-ND4L",
+"NDUFB1", "MT-ND6") %>% sort()
+```
+
+```{r}
+misc <- c("GLUD1", "NAGS", "ARG2", "DHODH", "P4HA1", "PRODH", "PRODH2", "ALDH4A1", "GLUL", "PRPS1", "PRPS2", "PYCR1", "PYCR2", "PYCR3" )
+
+oxphos.assem <- c("ACAD9", "AIFM1", "ATPAF1", "ATPAF2", "ATPSCKMT", "BCS1L", "CEP89", "CMC1", "CMC2", "COA1", "COA3", 'COA4', "COA5", "COA6", "COA7", "COA8", "COX10", "COX11", "COX14", "COX15", "COX16", "COX17", "COX18", "COX19", "COX20", "COX7A2L", "DMAC1", "DMAC2", "ECSIT", "FMC1", "FOXRED1", "HIGD1A", "HIGD2A", "LYRM2", "LYRM7", "NDUFAF1", "NDUFAF2", "NDUFAF3", "NDUFAF4", "NDUFAF5", "NDUFAF6", "NDUFAF7", "NDUFAF8", "NUBPL", "PET100", "PET117", "PNKD", "RAB5IF", "SCO1", "SCO2", "SDHAF1", "SDHAF2", "SDHAF3", "SDHAF4", "SMIM20", "SURF1", "TACO1", "TIMM21", "TIMMDC1", "TMEM126A", "TMEM126B", "TMEM177", "TMEM186", "TMEM70", "TTC19", "UQCC1", "UQCC2", "UQCC3")
+
+oxphos <- c("ATP5F1A","ATP5F1B","ATP5F1C","ATP5F1D","ATP5F1E","ATP5IF1","ATP5MC1","ATP5MC2","ATP5MC3","ATP5MD","ATP5ME","ATP5MF","ATP5MG","ATP5MPL","ATP5PB","ATP5PD","ATP5PF","ATP5PO","COX4I1","COX4I2","COX5A","COX5B","COX6A1","COX6A2","COX6B1","COX6B2","COX6C","COX7A1","COX7A2","COX7A2L","COX7B","COX7B2","COX7C","COX8A","COX8C","CYC1","CYCS","DMAC2L","HCCS","MT-ATP6","MT-ATP8","MT-CO1","MT-CO2","MT-CO3","MT-CYB","MT-ND1","MT-ND2","MT-ND3","MT-ND4","MT-ND4L","MT-ND5","MT-ND6","NDUFA1","NDUFA10","NDUFA11","NDUFA12","NDUFA13","NDUFA2","NDUFA3","NDUFA4","NDUFA5","NDUFA6","NDUFA7","NDUFA8","NDUFA9","NDUFAB1","NDUFB1","NDUFB10","NDUFB11","NDUFB2","NDUFB3","NDUFB4","NDUFB5","NDUFB6","NDUFB7","NDUFB8","NDUFB9","NDUFC1","NDUFC2","NDUFS1","NDUFS2","NDUFS3","NDUFS4","NDUFS5","NDUFS6","NDUFS7","NDUFS8","NDUFV1","NDUFV2","NDUFV3","SDHA","SDHB","SDHC","SDHD","UQCR10","UQCR11","UQCRB","UQCRC1","UQCRC2","UQCRFS1","UQCRH","UQCRQ")
+```
+
+
+```{r Calculate avg expression}
+# Calculate the average expression of each gene across every cell type
+avg_expression <- AverageExpression(harmonized.seurat, return.seurat = TRUE, group.by = c("status", "ident"))
+avg_expression.sub <- subset(avg_expression, idents = c("Endothelial", "Epithelial 1", "Epithelial 2", "Epithelial 3", "Lymphocytes", "Macrophages", "Stellate"))
+```
+
+```{r}
+avg_expression.sub@active.ident <- avg_expression.sub@active.ident %>%
+  factor(levels = c("Endothelial", "Epithelial 1", "Epithelial 2", "Epithelial 3", "Lymphocytes", "Macrophages", "Stellate"))
+```
+
+```{r 1 Metabolic switch glycolysis}
+p1 <- DoHeatmap(avg_expression.sub, features = metab.switch.gly, draw.lines = FALSE, group.by = "ident", size = 4)
+p1
+ggsave("./heatmaps/averageExp/metabolic-switch-glycolysis-withoutunknown.png", dpi = 300, width = 10, height = 10)
+```
+
+```{r 2 Sugar Transporters}
+p2 <- DoHeatmap(avg_expression.sub, features = sug.trans, draw.lines = FALSE, group.by = "ident", size = 4)
+p2
+ggsave("./heatmaps/averageExp/sugarTransporters-withoutunknown.png", dpi = 300, width = 10, height = 10)
+```
+
+```{r 3 Pyruvate Centralization}
+p3 <- DoHeatmap(avg_expression.sub, features = pyruvate.cent, draw.lines = FALSE, group.by = "ident", size = 4)
+p3
+ggsave("./heatmaps/averageExp/pyruvateCentralization-withoutunknown.png", dpi = 300, width = 10, height = 10)
+```
+
+```{r 4 Proline Production}
+p4 <- DoHeatmap(avg_expression.sub, features = proline.prod, draw.lines = FALSE, group.by = "ident", size = 4)
+p4
+ggsave("./heatmaps/averageExp/ProlineProduction-withoutunknown.png", dpi = 300, width = 10, height = 10)
+```
+
+```{r 5 Oat Nexus}
+p5 <- DoHeatmap(avg_expression.sub, features = oat.nexus, draw.lines = FALSE, group.by = "ident", size = 4)
+p5
+ggsave("./heatmaps/averageExp/OatNexus-withoutunknown.png", dpi = 300, width = 10, height = 10)
+```
+
+```{r 6 Fatty acid transport}
+p6 <- DoHeatmap(avg_expression.sub, features = fa.trans, draw.lines = FALSE, group.by = "ident", size = 4)
+p6
+ggsave("./heatmaps/averageExp/fattyAcidTransport-withoutunknown.png", dpi = 300, width = 10, height = 10)
+```
+
+```{r 7 Amino acid transport}
+p7 <- DoHeatmap(avg_expression.sub, features = aa.trans, draw.lines = FALSE, group.by = "ident", size = 4)
+p7
+ggsave("./heatmaps/averageExp/aminoAcidTransport-withoutunknown.png", dpi = 300, width = 10, height = 10)
+```
+
+```{r 8 Calcium homeostasis}
+p8 <- DoHeatmap(avg_expression.sub, features = cal.homeo, draw.lines = FALSE, group.by = "ident", size = 4)
+p8
+ggsave("./heatmaps/averageExp/calciumHomestasis-withoutunknown.png", dpi = 300, width = 10, height = 13)
+```
+
+```{r 9 TCA}
+p9 <- DoHeatmap(avg_expression.sub, features = tca, draw.lines = FALSE, group.by = "ident", size = 4)
+p9
+ggsave("./heatmaps/averageExp/TCA-withoutunknown.png", dpi = 300, width = 10, height = 10)
+```
+
+```{r 10 Mito_Protein_Import_Sorting_Homeostatsis}
+p10 <- DoHeatmap(avg_expression.sub, features = mito.import, draw.lines = FALSE, group.by = "ident", size = 4)
+p10
+ggsave("./heatmaps/averageExp/mitoProteinImportSortingHomeostasis-withoutunknown.png", dpi = 300, width = 10, height = 13)
+```
+
+```{r 11 Etc assembly factors}
+p11 <- DoHeatmap(avg_expression.sub, features = etc.assem, draw.lines = FALSE, group.by = "ident", size = 4)
+p11
+ggsave("./heatmaps/averageExp/etcAssemblyFactors-withoutunknown.png", dpi = 300, width = 10, height = 13)
+```
+
+```{r 12 Etc}
+p12 <- DoHeatmap(avg_expression.sub, features = etc, draw.lines = FALSE, group.by = "ident", size = 4)
+p12
+ggsave("./heatmaps/averageExp/etc-withoutunknown.png", dpi = 300, width = 10, height = 13)
+```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("GRAMD1B", "STIM1", "PKD2", "TMCO1")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4)
+  ggsave(paste0("UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-RNA.png"), units = "in", width = 18, height = 10, dpi = 300)
+}
+```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("SLC27A4", "ACSL5", "SLC27A3", "SLC27A2", "SLC27A1", "ACSL6", "CD36")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4)
+  ggsave(paste0("UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-RNA.png"), units = "in", width = 18, height = 10, dpi = 300)
+}
+```
+
+```{r}
+for (gene in c("SLC16A7","SLC16A1", "LDHA", "SLC2A2", "HK2", "GCK", "PFKFB1", "PFKFB2", "G6PD", "TKT", "BPGM", "MINPP1", "ALDOA", "ALDOB", "ALDOC", "PFKP", "PFKL", "PFKM", "PKM", "PKLR", "SLC37A4", "PGK1", "PGK2", "ENO3", "KHK", "GK", "AKR1B1", "GPAM", "GPD1", "GPD1L", "GPD2", "ACLY", "PCK", "IDH1", "ELOVL5", "BCAT1")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4)
+  ggsave(paste0("UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-RNA.png"), units = "in", width = 18, height = 10, dpi = 300)
+}
+```
+
+```{r}
+DimPlot(harmonized.seurat, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend()
+ggsave(paste0("UMAPs/UMAPoverlays/", proj_name, "_umap_clusterRenamed.png"), units = 'in', width = 6, height = 6, dpi = 300)
+```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("C1QB", "PTPRB", "NPPB", "FGFR2", "CYP3A4", "FYN", "EPCAM", "PKHD1", "FGFR2", "TYROBP", "SRGN", "C1QB", "NOSTRIN", "PTPRB", "LDB2", "CTGF", "ACTA2", "CALD1")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2,  label = FALSE, repel = FALSE)
+  ggsave(paste0("UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-SCT-noLabel.png"), units = "in", width = 8, height = 8, dpi = 300)
+}
+```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("HNF4A")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2,  label = FALSE, repel = FALSE)
+  ggsave(paste0("UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-SCT-noLabel.png"), units = "in", width = 8, height = 8, dpi = 300)
+}
+```
+
+```{r}
+PrepSCTFindMarkers(harmonized.seurat)
+markers <- FindAllMarkers(harmonized.seurat, 
+                          assay = "SCT",
+                          min.pct = -Inf, 
+                          logfc.threshold = .5, 
+                          only.pos = T, 
+                          test.use = "wilcox",
+                          latent.vars = c('percent.mt', 'nFeature_RNA'))
+
+markers <- markers %>%
+  filter(avg_log2FC > 0) %>%
+  write_csv(paste0("markers", proj_name, '_HighlyEnrichedMarkers_logFC.5_wilcox-12cluster-SCT.csv'))
+markers <- read_csv(paste0("markers", proj_name, '_HighlyEnrichedMarkers_logFC.5_wilcox-12cluster-SCT.csv'))
+head(markers)
+```
+
+
+```{r find-differentially-expressed, warning=F}
+# For each cluster
+deg <- data.frame()
+for (c in levels(Idents(harmonized.seurat))) {
+  print(paste0("Generating differential expression within cluster: ", c))
+  sub_obj <- subset(harmonized.seurat, idents = c)
+  print(levels(Idents(sub_obj)))
+  Idents(sub_obj) <- "group"
+  print(levels(Idents(sub_obj)))
+  print(sub_obj)
+  
+  mks <- FindMarkers(sub_obj, 
+                     ident.1 = '375KO', 
+                     ident.2 = 'WT', 
+                     test.use = "MAST", 
+                     min.pct = -Inf, 
+                     logfc.threshold = -Inf,
+                     latent.vars = c('percent.mt', 'nFeature_RNA'))
+  
+  exp <- AverageExpression(sub_obj, assays = "RNA")$RNA %>%
+    as.data.frame() %>%
+    rownames_to_column(var = "gene")
+  
+  names(exp)[2:3] <- paste0("exp_", names(exp)[2:3])
+  
+  mks <- mks %>% 
+    as.data.frame() %>%
+    mutate(gene = row.names(.),
+           cluster = c) %>%
+    left_join(exp)
+  deg <- bind_rows(deg, mks)
+  print(head(deg))
+}
+
+head(deg)
+
+write_csv(deg, file = paste0(proj_name, '_DEG_clusterNamed_375KOvsWT.csv'))
+```
+
+

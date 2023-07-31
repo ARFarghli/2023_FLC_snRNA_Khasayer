@@ -62,9 +62,40 @@ ggsave(paste0("UMAPs/UMAPoverlays/", proj_name, "_umap_clusterNamed.png"), units
 
 ```{r}
 DefaultAssay(harmonized.seurat) <- "integrated"
-for (gene in c("PDGFB", "PDGFRB", "WNT4", "FZD10", "VEGFA", "TGFB3", "TGFBR2", "TGFBR1", "KDR", "FLT1", "CTLA4")) {
+for (gene in c("SOX17", "GLS", "PDGFB", "PDGFRB", "WNT4", "FZD10", "VEGFA", "TGFB3", "TGFBR2", "TGFBR1", "KDR", "FLT1", "CTLA4")) {
   FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4)
   ggsave(paste0("UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-integrated.png"), units = "in", width = 18, height = 10, dpi = 300)
 }
 ```
 
+```{r}
+DefaultAssay(harmonized.seurat) <- "RNA"
+for (gene in c("CXCR4", "CXCL12", "BAG2")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4)
+  ggsave(paste0("UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-RNA.png"), units = "in", width = 18, height = 10, dpi = 300)
+}
+```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "RNA"
+for (gene in c("OAT", "OTC", "LDHB", "SDS", "GLS", "ALDH18A1", "PYCR1", "PYCR2", "PRODH", "P4HA2")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4)
+  ggsave(paste0("UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-RNA.png"), units = "in", width = 18, height = 10, dpi = 300)
+}
+```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("VCAN", "SLC16A14")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4, label = TRUE)
+  ggsave(paste0("UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-named.png"), units = "in", width = 18, height = 10, dpi = 300)
+}
+```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("GLI1", "GLI2", "GLI3", "BAG2", "STIP1")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4, label = TRUE)
+  ggsave(paste0("UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-named.png"), units = "in", width = 18, height = 10, dpi = 300)
+}
+```
