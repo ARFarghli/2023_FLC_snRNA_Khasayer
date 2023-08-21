@@ -1,0 +1,152 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' class='svglite' width='504.00pt' height='360.00pt' viewBox='0 0 504.00 360.00'>
+<defs>
+  <style type='text/css'><![CDATA[
+    .svglite line, .svglite polyline, .svglite polygon, .svglite path, .svglite rect, .svglite circle {
+      fill: none;
+      stroke: #000000;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-miterlimit: 10.00;
+    }
+    .svglite text {
+      white-space: pre;
+    }
+  ]]></style>
+</defs>
+<rect width='100%' height='100%' style='stroke: none; fill: #FFFFFF;'/>
+<defs>
+  <clipPath id='cpMC4wMHw1MDQuMDB8MC4wMHwzNjAuMDA='>
+    <rect x='0.00' y='0.00' width='504.00' height='360.00' />
+  </clipPath>
+</defs>
+<g clip-path='url(#cpMC4wMHw1MDQuMDB8MC4wMHwzNjAuMDA=)'>
+</g>
+<defs>
+  <clipPath id='cpMC4wMHwyNTIuMDB8MC4wMHwzNjAuMDA='>
+    <rect x='0.00' y='0.00' width='252.00' height='360.00' />
+  </clipPath>
+</defs>
+<g clip-path='url(#cpMC4wMHwyNTIuMDB8MC4wMHwzNjAuMDA=)'>
+</g>
+<defs>
+  <clipPath id='cpNTkuMDR8MjIxLjc2fDU5LjA0fDI4Ni41Ng=='>
+    <rect x='59.04' y='59.04' width='162.72' height='227.52' />
+  </clipPath>
+</defs>
+<g clip-path='url(#cpNTkuMDR8MjIxLjc2fDU5LjA0fDI4Ni41Ng==)'>
+<circle cx='80.37' cy='112.77' r='3.30' style='stroke-width: 0.75; stroke: #E41A1C; fill: #E41A1C;' />
+<circle cx='80.37' cy='152.79' r='3.30' style='stroke-width: 0.75; stroke: #377EB8; fill: #377EB8;' />
+<circle cx='80.37' cy='192.81' r='3.30' style='stroke-width: 0.75; stroke: #4DAF4A; fill: #4DAF4A;' />
+<circle cx='80.37' cy='232.83' r='3.30' style='stroke-width: 0.75; stroke: #984EA3; fill: #984EA3;' />
+<circle cx='200.43' cy='112.77' r='3.30' style='stroke-width: 0.75; stroke: #F29403; fill: #F29403;' />
+<circle cx='200.43' cy='129.92' r='3.30' style='stroke-width: 0.75; stroke: #F781BF; fill: #F781BF;' />
+<circle cx='200.43' cy='147.07' r='3.30' style='stroke-width: 0.75; stroke: #BC9DCC; fill: #BC9DCC;' />
+<circle cx='200.43' cy='164.22' r='3.30' style='stroke-width: 0.75; stroke: #A65628; fill: #A65628;' />
+<circle cx='200.43' cy='181.38' r='3.30' style='stroke-width: 0.75; stroke: #54B0E4; fill: #54B0E4;' />
+<circle cx='200.43' cy='198.53' r='3.30' style='stroke-width: 0.75; stroke: #222F75; fill: #222F75;' />
+<circle cx='200.43' cy='215.68' r='3.30' style='stroke-width: 0.75; stroke: #1B9E77; fill: #1B9E77;' />
+<circle cx='200.43' cy='232.83' r='3.30' style='stroke-width: 0.75; stroke: #B2DF8A; fill: #B2DF8A;' />
+<circle cx='140.40' cy='112.77' r='3.30' style='stroke-width: 1.50; stroke: #E41A1C; fill: #FFFFFF;' />
+<circle cx='140.40' cy='152.79' r='3.30' style='stroke-width: 1.50; stroke: #377EB8; fill: #FFFFFF;' />
+<circle cx='140.40' cy='192.81' r='3.30' style='stroke-width: 1.50; stroke: #4DAF4A; fill: #FFFFFF;' />
+<circle cx='140.40' cy='232.83' r='3.30' style='stroke-width: 1.50; stroke: #984EA3; fill: #FFFFFF;' />
+</g>
+<g clip-path='url(#cpMC4wMHwyNTIuMDB8MC4wMHwzNjAuMDA=)'>
+<text x='60.87' y='115.22' text-anchor='middle' style='font-size: 9.60px; font-family: "Nimbus Sans";' textLength='46.93px' lengthAdjust='spacingAndGlyphs'>Epithelial 1</text>
+<text x='60.87' y='155.24' text-anchor='middle' style='font-size: 9.60px; font-family: "Nimbus Sans";' textLength='46.93px' lengthAdjust='spacingAndGlyphs'>Epithelial 2</text>
+<text x='60.87' y='196.19' text-anchor='middle' style='font-size: 9.60px; font-family: "Nimbus Sans";' textLength='47.47px' lengthAdjust='spacingAndGlyphs'>Endothelial</text>
+<text x='60.87' y='235.27' text-anchor='middle' style='font-size: 9.60px; font-family: "Nimbus Sans";' textLength='46.93px' lengthAdjust='spacingAndGlyphs'>Epithelial 3</text>
+<text x='219.93' y='115.22' text-anchor='middle' style='font-size: 9.60px; font-family: "Nimbus Sans";' textLength='46.93px' lengthAdjust='spacingAndGlyphs'>Epithelial 4</text>
+<text x='219.93' y='133.37' text-anchor='middle' style='font-size: 9.60px; font-family: "Nimbus Sans";' textLength='32.00px' lengthAdjust='spacingAndGlyphs'>Stellate</text>
+<text x='219.93' y='149.52' text-anchor='middle' style='font-size: 9.60px; font-family: "Nimbus Sans";' textLength='46.93px' lengthAdjust='spacingAndGlyphs'>Epithelial 5</text>
+<text x='219.93' y='166.73' text-anchor='middle' style='font-size: 9.60px; font-family: "Nimbus Sans";' textLength='60.79px' lengthAdjust='spacingAndGlyphs'>Cholangiocyte</text>
+<text x='219.93' y='183.82' text-anchor='middle' style='font-size: 9.60px; font-family: "Nimbus Sans";' textLength='58.13px' lengthAdjust='spacingAndGlyphs'>Macrophages</text>
+<text x='219.93' y='200.97' text-anchor='middle' style='font-size: 9.60px; font-family: "Nimbus Sans";' textLength='51.72px' lengthAdjust='spacingAndGlyphs'>Lymphocyte</text>
+<text x='219.93' y='218.12' text-anchor='middle' style='font-size: 9.60px; font-family: "Nimbus Sans";' textLength='46.93px' lengthAdjust='spacingAndGlyphs'>Epithelial 6</text>
+<text x='219.93' y='236.21' text-anchor='middle' style='font-size: 9.60px; font-family: "Nimbus Sans";' textLength='39.99px' lengthAdjust='spacingAndGlyphs'>Unknown</text>
+</g>
+<g clip-path='url(#cpNTkuMDR8MjIxLjc2fDU5LjA0fDI4Ni41Ng==)'>
+<text x='76.37' y='99.11' text-anchor='middle' style='font-size: 9.60px;fill: #C51B7D; font-family: "Liberation Sans";' textLength='32.95px' lengthAdjust='spacingAndGlyphs'>Source</text>
+<text x='144.77' y='98.12' text-anchor='middle' style='font-size: 9.60px;fill: #C51B7D; font-family: "Liberation Sans";' textLength='29.68px' lengthAdjust='spacingAndGlyphs'>Target</text>
+<text x='204.43' y='99.11' text-anchor='middle' style='font-size: 9.60px;fill: #2F6661; font-family: "Liberation Sans";' textLength='32.95px' lengthAdjust='spacingAndGlyphs'>Source</text>
+<line x1='76.37' y1='105.27' x2='140.40' y2='105.27' style='stroke-width: 0.60; stroke: #C51B7D;' />
+<polygon points='136.87,107.03 143.93,105.27 136.87,103.51 ' style='stroke-width: 0.000075; stroke: #C51B7D; fill: #C51B7D;' />
+<line x1='204.43' y1='105.27' x2='145.20' y2='105.27' style='stroke-width: 0.60; stroke: #2F6661;' />
+<polygon points='148.73,103.51 141.68,105.27 148.73,107.03 ' style='stroke-width: 0.000075; stroke: #2F6661; fill: #2F6661;' />
+</g>
+<defs>
+  <clipPath id='cpMzExLjA0fDQ3My43Nnw1OS4wNHwyODYuNTY='>
+    <rect x='311.04' y='59.04' width='162.72' height='227.52' />
+  </clipPath>
+</defs>
+<g clip-path='url(#cpMzExLjA0fDQ3My43Nnw1OS4wNHwyODYuNTY=)'>
+</g>
+<defs>
+  <clipPath id='cpMjUyLjAwfDUwNC4wMHwwLjAwfDM2MC4wMA=='>
+    <rect x='252.00' y='0.00' width='252.00' height='360.00' />
+  </clipPath>
+</defs>
+<g clip-path='url(#cpMjUyLjAwfDUwNC4wMHwwLjAwfDM2MC4wMA==)'>
+</g>
+<g clip-path='url(#cpMzExLjA0fDQ3My43Nnw1OS4wNHwyODYuNTY=)'>
+<line x1='332.65' y1='112.85' x2='392.40' y2='129.92' style='stroke-width: 0.84; stroke: #E41A1C; stroke-opacity: 0.60;' />
+<line x1='332.64' y1='152.69' x2='392.40' y2='129.92' style='stroke-width: 0.84; stroke: #377EB8; stroke-opacity: 0.60;' />
+<line x1='332.52' y1='232.58' x2='392.40' y2='129.92' style='stroke-width: 0.84; stroke: #984EA3; stroke-opacity: 0.60;' />
+<line x1='452.15' y1='112.85' x2='392.40' y2='129.92' style='stroke-width: 0.84; stroke: #F29403; stroke-opacity: 0.60;' />
+<line x1='452.18' y1='164.08' x2='392.40' y2='129.92' style='stroke-width: 6.23; stroke: #A65628; stroke-opacity: 0.60;' />
+<line x1='452.21' y1='181.19' x2='392.40' y2='129.92' style='stroke-width: 2.67; stroke: #54B0E4; stroke-opacity: 0.60;' />
+<polygon points='389.37,130.03 390.30,129.85 392.38,129.99 392.42,129.85 390.58,128.88 389.89,128.23 ' style='stroke-width: 0.75; stroke: #E41A1C; stroke-opacity: 0.60; fill: #E41A1C; fill-opacity: 0.60;' />
+<polygon points='390.04,131.82 390.68,131.12 392.43,129.99 392.37,129.86 390.32,130.18 389.38,130.07 ' style='stroke-width: 0.75; stroke: #377EB8; stroke-opacity: 0.60; fill: #377EB8; fill-opacity: 0.60;' />
+<polygon points='391.76,132.88 391.81,131.94 392.46,129.96 392.34,129.89 390.94,131.43 390.14,131.94 ' style='stroke-width: 0.75; stroke: #984EA3; stroke-opacity: 0.60; fill: #984EA3; fill-opacity: 0.60;' />
+<polygon points='394.91,128.23 394.22,128.88 392.38,129.85 392.42,129.99 394.50,129.85 395.43,130.03 ' style='stroke-width: 0.75; stroke: #F29403; stroke-opacity: 0.60; fill: #F29403; fill-opacity: 0.60;' />
+<polygon points='395.36,130.54 394.42,130.50 392.44,129.86 392.36,129.99 393.92,131.37 394.44,132.17 ' style='stroke-width: 0.75; stroke: #A65628; stroke-opacity: 0.60; fill: #A65628; fill-opacity: 0.60;' />
+<polygon points='395.20,131.09 394.27,130.87 392.45,129.87 392.35,129.98 393.62,131.63 393.98,132.51 ' style='stroke-width: 0.75; stroke: #54B0E4; stroke-opacity: 0.60; fill: #54B0E4; fill-opacity: 0.60;' />
+<circle cx='332.37' cy='112.77' r='3.30' style='stroke-width: 0.75; stroke: #E41A1C; fill: #E41A1C;' />
+<circle cx='332.37' cy='152.79' r='3.30' style='stroke-width: 0.75; stroke: #377EB8; fill: #377EB8;' />
+<circle cx='332.37' cy='192.81' r='3.30' style='stroke-width: 0.75; stroke: #4DAF4A; fill: #4DAF4A;' />
+<circle cx='332.37' cy='232.83' r='3.30' style='stroke-width: 0.75; stroke: #984EA3; fill: #984EA3;' />
+<circle cx='452.43' cy='112.77' r='3.30' style='stroke-width: 0.75; stroke: #F29403; fill: #F29403;' />
+<circle cx='452.43' cy='129.92' r='3.30' style='stroke-width: 0.75; stroke: #F781BF; fill: #F781BF;' />
+<circle cx='452.43' cy='147.07' r='3.30' style='stroke-width: 0.75; stroke: #BC9DCC; fill: #BC9DCC;' />
+<circle cx='452.43' cy='164.22' r='3.30' style='stroke-width: 0.75; stroke: #A65628; fill: #A65628;' />
+<circle cx='452.43' cy='181.38' r='3.30' style='stroke-width: 0.75; stroke: #54B0E4; fill: #54B0E4;' />
+<circle cx='452.43' cy='198.53' r='3.30' style='stroke-width: 0.75; stroke: #222F75; fill: #222F75;' />
+<circle cx='452.43' cy='215.68' r='3.30' style='stroke-width: 0.75; stroke: #1B9E77; fill: #1B9E77;' />
+<circle cx='452.43' cy='232.83' r='3.30' style='stroke-width: 0.75; stroke: #B2DF8A; fill: #B2DF8A;' />
+<circle cx='392.40' cy='112.77' r='3.30' style='stroke-width: 1.50; stroke: #F29403; fill: #FFFFFF;' />
+<circle cx='392.40' cy='129.92' r='3.30' style='stroke-width: 1.50; stroke: #F781BF; fill: #FFFFFF;' />
+<circle cx='392.40' cy='147.07' r='3.30' style='stroke-width: 1.50; stroke: #BC9DCC; fill: #FFFFFF;' />
+<circle cx='392.40' cy='164.22' r='3.30' style='stroke-width: 1.50; stroke: #A65628; fill: #FFFFFF;' />
+<circle cx='392.40' cy='181.38' r='3.30' style='stroke-width: 1.50; stroke: #54B0E4; fill: #FFFFFF;' />
+<circle cx='392.40' cy='198.53' r='3.30' style='stroke-width: 1.50; stroke: #222F75; fill: #FFFFFF;' />
+<circle cx='392.40' cy='215.68' r='3.30' style='stroke-width: 1.50; stroke: #1B9E77; fill: #FFFFFF;' />
+<circle cx='392.40' cy='232.83' r='3.30' style='stroke-width: 1.50; stroke: #B2DF8A; fill: #FFFFFF;' />
+</g>
+<g clip-path='url(#cpMjUyLjAwfDUwNC4wMHwwLjAwfDM2MC4wMA==)'>
+<text x='312.87' y='115.22' text-anchor='middle' style='font-size: 9.60px; font-family: "Nimbus Sans";' textLength='46.93px' lengthAdjust='spacingAndGlyphs'>Epithelial 1</text>
+<text x='312.87' y='155.24' text-anchor='middle' style='font-size: 9.60px; font-family: "Nimbus Sans";' textLength='46.93px' lengthAdjust='spacingAndGlyphs'>Epithelial 2</text>
+<text x='312.87' y='196.19' text-anchor='middle' style='font-size: 9.60px; font-family: "Nimbus Sans";' textLength='47.47px' lengthAdjust='spacingAndGlyphs'>Endothelial</text>
+<text x='312.87' y='235.27' text-anchor='middle' style='font-size: 9.60px; font-family: "Nimbus Sans";' textLength='46.93px' lengthAdjust='spacingAndGlyphs'>Epithelial 3</text>
+<text x='471.93' y='115.22' text-anchor='middle' style='font-size: 9.60px; font-family: "Nimbus Sans";' textLength='46.93px' lengthAdjust='spacingAndGlyphs'>Epithelial 4</text>
+<text x='471.93' y='133.37' text-anchor='middle' style='font-size: 9.60px; font-family: "Nimbus Sans";' textLength='32.00px' lengthAdjust='spacingAndGlyphs'>Stellate</text>
+<text x='471.93' y='149.52' text-anchor='middle' style='font-size: 9.60px; font-family: "Nimbus Sans";' textLength='46.93px' lengthAdjust='spacingAndGlyphs'>Epithelial 5</text>
+<text x='471.93' y='166.73' text-anchor='middle' style='font-size: 9.60px; font-family: "Nimbus Sans";' textLength='60.79px' lengthAdjust='spacingAndGlyphs'>Cholangiocyte</text>
+<text x='471.93' y='183.82' text-anchor='middle' style='font-size: 9.60px; font-family: "Nimbus Sans";' textLength='58.13px' lengthAdjust='spacingAndGlyphs'>Macrophages</text>
+<text x='471.93' y='200.97' text-anchor='middle' style='font-size: 9.60px; font-family: "Nimbus Sans";' textLength='51.72px' lengthAdjust='spacingAndGlyphs'>Lymphocyte</text>
+<text x='471.93' y='218.12' text-anchor='middle' style='font-size: 9.60px; font-family: "Nimbus Sans";' textLength='46.93px' lengthAdjust='spacingAndGlyphs'>Epithelial 6</text>
+<text x='471.93' y='236.21' text-anchor='middle' style='font-size: 9.60px; font-family: "Nimbus Sans";' textLength='39.99px' lengthAdjust='spacingAndGlyphs'>Unknown</text>
+</g>
+<g clip-path='url(#cpMzExLjA0fDQ3My43Nnw1OS4wNHwyODYuNTY=)'>
+<text x='328.37' y='99.11' text-anchor='middle' style='font-size: 9.60px;fill: #C51B7D; font-family: "Liberation Sans";' textLength='32.95px' lengthAdjust='spacingAndGlyphs'>Source</text>
+<text x='396.77' y='98.12' text-anchor='middle' style='font-size: 9.60px;fill: #2F6661; font-family: "Liberation Sans";' textLength='29.68px' lengthAdjust='spacingAndGlyphs'>Target</text>
+<text x='456.43' y='99.11' text-anchor='middle' style='font-size: 9.60px;fill: #2F6661; font-family: "Liberation Sans";' textLength='32.95px' lengthAdjust='spacingAndGlyphs'>Source</text>
+<line x1='328.37' y1='105.27' x2='392.40' y2='105.27' style='stroke-width: 0.60; stroke: #C51B7D;' />
+<polygon points='388.87,107.03 395.93,105.27 388.87,103.51 ' style='stroke-width: 0.000075; stroke: #C51B7D; fill: #C51B7D;' />
+<line x1='456.43' y1='105.27' x2='397.20' y2='105.27' style='stroke-width: 0.60; stroke: #2F6661;' />
+<polygon points='400.73,103.51 393.68,105.27 400.73,107.03 ' style='stroke-width: 0.000075; stroke: #2F6661; fill: #2F6661;' />
+</g>
+<g clip-path='url(#cpMC4wMHw1MDQuMDB8MC4wMHwzNjAuMDA=)'>
+<text x='252.00' y='83.52' text-anchor='middle' style='font-size: 12.00px; font-family: "Liberation Sans";' textLength='198.53px' lengthAdjust='spacingAndGlyphs'>PDGF signaling pathway network</text>
+</g>
+</svg>
