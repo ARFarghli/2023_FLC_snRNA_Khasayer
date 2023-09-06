@@ -251,7 +251,7 @@ markers <- FindAllMarkers(harmonized.seurat,
                           latent.vars = c('percent.mt', 'nFeature_RNA'))
 
 markers <- markers %>%
-  filter(avg_log2FC > 0) %>%
-  write_csv(paste0("./revisedDataset/cell_type_assignment/", proj_name, '_HighlyEnrichedMarkers_CLUSTERNAMED_logFC.25.csv'))
+  filter(avg_log2FC > 0.25) %>%
+  write_csv(paste0("./revisedDataset/cell_type_assignment/", proj_name, '_HighlyEnrichedMarkers_CLUSTERNAMED_logFC.25_wilcox.csv'))
 
 ```

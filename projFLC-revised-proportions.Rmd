@@ -1,0 +1,80 @@
+---
+title: "Proportions"
+output: html_document
+date: "2023-08-07"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(reshape2)
+library(treemapify)
+```
+
+```{r}
+sample_cluster_counts <- table(harmonized.seurat$seurat_clusters, harmonized.seurat$id)
+sample_cluster_percent <- prop.table(sample_cluster_counts, margin = 1)
+```
+
+```{r}
+sample_cluster_df <- as.data.frame(sample_cluster_percent) %>% 
+  rename(Cluster = Var1, ID = Var2)
+```
+
+```{r}
+ggplot(sample_cluster_df, aes(x = Cluster, y = Freq, fill = ID)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Percentage of Cells from Each Sample in Each Cluster",
+       x = "Cluster",
+       y = "Percent") +
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+
+ggsave("./revisedDataset/proportions/Percent-cell-in-cluster-bySeuratCluster.png", width = 9, height = 5, units = "in", dpi = 600)
+```
+
+```{r}
+treemap_counts <- table(harmonized.seurat$status, harmonized.seurat$cluster_named) %>% 
+  as.data.frame() %>% 
+  rename(Status = Var1, Cluster = Var2) 
+
+treemap_flc <- treemap_counts %>% 
+  filter(Status == "FLC") %>% 
+  mutate(Proportion = Freq/sum(Freq)*100)
+
+treemap_nml <- treemap_counts %>% 
+  filter(Status == "NML") %>% 
+  mutate(Proportion = Freq/sum(Freq)*100)
+```
+
+```{r}
+treemap_flc_plot <- ggplot(treemap_flc, aes(area = Freq, fill = Cluster,
+                                label = paste0(Cluster, "\nCount: ", Freq, "\nProportion: ", round(Proportion,1)))) +
+  geom_treemap() +
+  geom_treemap_text(size = 10, hjust = 0.5, vjust = 0.5, color = "black", fontface = "bold") +
+  labs(title = "Treemap of Relative Cell Proportions within FLC",
+       fill = "Tissue Status",
+       caption = "Source: Khasayer Lab") +
+  theme_minimal()
+
+treemap_flc_plot + ggsave("revisedDataset/proportions/flc_treemap.png", width = 9, height = 5, units = "in", dpi = 600)
+```
+
+```{r}
+treemap_nml_plot <- ggplot(treemap_nml, aes(area = Freq, fill = Cluster,
+                                label = paste0(Cluster, "\nCount: ", Freq, "\nProportion: ", round(Proportion,1)))) +
+  geom_treemap() +
+  geom_treemap_text(size = 10, hjust = 0.5, vjust = 0.5, color = "black", fontface = "bold") +
+  labs(title = "Treemap of Relative Cell Proportions within NML",
+       fill = "Tissue Status",
+       caption = "Source: Khasayer Lab") +
+  theme_minimal()
+
+treemap_nml_plot + ggsave("revisedDataset/proportions/nml_treemap.png", width = 9, height = 5, units = "in", dpi = 600)
+```
+

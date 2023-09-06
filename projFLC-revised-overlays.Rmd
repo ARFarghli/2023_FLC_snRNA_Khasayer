@@ -1,0 +1,49 @@
+---
+title: "projFLC-revised-overlays"
+output: html_document
+date: "2023-08-07"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load-libraries}
+library(Seurat)
+library(tidyverse)
+```
+
+```{r}
+harmonized.seurat <- readRDS("./revisedDataset/rds/FLCvNML_Named-obj.rds")
+```
+
+```{r set seed and project name, warning=F, message=F}
+set.seed(1234)
+proj_name <- "FLCvNML"
+```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("VCAN", "SLC16A14", "GLI1", "GLI2", "GLI3", "BAG2", "STIP1", "OAT", "OTC", "LDHB", "SDS", "GLS", "ALDH18A1", "PYCR1", "PYCR2", "PRODH", "P4HA2", "CXCR4", "CXCL12", "SOX17", "GLS", "PDGFB", "PDGFRB", "WNT4", "FZD10", "VEGFA", "TGFB3", "TGFBR2", "TGFBR1", "KDR", "FLT1", "CTLA4", "GRAMD1B", "STIM1", "PKD2", "TMCO1", "SLC27A4", "ACSL5", "SLC27A3", "SLC27A2", "SLC27A1", "ACSL6", "CD36", "SLC16A7","SLC16A1", "LDHA", "SLC2A2", "HK2", "GCK", "PFKFB1", "PFKFB2", "G6PD", "TKT", "BPGM", "MINPP1", "ALDOA", "ALDOB", "ALDOC", "PFKP", "PFKL", "PFKM", "PKM", "PKLR", "SLC37A4", "PGK1", "ENO3", "KHK", "GK", "AKR1B1", "GPAM", "GPD1", "GPD1L", "GPD2", "ACLY", "IDH1", "ELOVL5", "BCAT1",  "PTPRB", "NPPB",  "CYP3A4", "FYN", "EPCAM", "PKHD1", "FGFR2", "TYROBP", "SRGN", "C1QB", "NOSTRIN", "PTPRB", "LDB2", "ACTA2", "CALD1", "HNF4A")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4, label = TRUE)
+  ggsave(paste0("./revisedDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-named.png"), units = "in", width = 18, height = 10, dpi = 300)
+}
+```
+
+```{r}
+for (gene in c("ENO3", "KHK", "GK", "AKR1B1", "GPAM", "GPD1", "GPD1L", "GPD2", "ACLY", "IDH1", "ELOVL5", "BCAT1",  "PTPRB", "NPPB",  "CYP3A4", "FYN", "EPCAM", "PKHD1", "FGFR2", "TYROBP", "SRGN", "C1QB", "NOSTRIN", "PTPRB", "LDB2", "ACTA2", "CALD1", "HNF4A")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4, label = TRUE)
+  ggsave(paste0("./revisedDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-named.png"), units = "in", width = 18, height = 10, dpi = 300)
+}
+```
+
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "RNA"
+for (gene in c("CXCR4", "CXCL12")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4, label = TRUE)
+  ggsave(paste0("./revisedDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-RNA-named.png"), units = "in", width = 18, height = 10, dpi = 300)
+}
+```
+
+

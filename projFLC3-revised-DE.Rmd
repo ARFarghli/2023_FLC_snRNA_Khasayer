@@ -1,0 +1,95 @@
+---
+title: "Differential expression"
+output: html_document
+date: "2023-07-31"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r load-libraries}
+library(Seurat)
+library(tidyverse)
+```
+
+# Single cell RNAseq analysis
+
+This is the continued single nuclei RNAseq analysis of FLC provided by the Khasayer lab.
+
+## Seurat analysis
+
+### Find markers
+
+```{r find-markers, warning=F, message=F}
+set.seed(1234)
+proj_name <- "FLCvNML"
+```
+
+```{r}
+harmonized.seurat <- readRDS('./fullDataset/rds/FLCvNML_harmonized-byID-obj.rds')
+```
+
+```{r}
+levels(harmonized.seurat)
+```
+
+## Differential expression within assigned cluster
+
+For the differential expression, we can use FindMarkers or FindConservedMarkers. Since we have 2 samples (1 WT and 1 KO), we will use FindMarkers. If we had two separate sequencing sets with potentially large batch effects, we could use FindConservedMarkers instead.
+
+```{r}
+harmonized.seurat <- PrepSCTFindMarkers(harmonized.seurat)
+```
+
+
+```{r find-differentially-expressed, warning=F}
+# For each cluster
+DefaultAssay(harmonized.seurat) <- "RNA"
+deg <- data.frame()
+for (c in levels(Idents(harmonized.seurat))) {
+  print(paste0("Generating differential expression within cluster: ", c))
+  sub_obj <- subset(harmonized.seurat, idents = c)
+  print(levels(Idents(sub_obj)))
+  Idents(sub_obj) <- "status"
+  print(levels(Idents(sub_obj)))
+  print(sub_obj)
+  
+  mks <- FindMarkers(sub_obj, 
+                     ident.1 = "FLC", 
+                     ident.2 = "NML", 
+                     test.use = "MAST", 
+                     min.pct = -Inf, 
+                     logfc.threshold = -Inf,
+                     assay = "RNA",
+                     latent.vars = c('percent.mt', 'nFeature_RNA'))
+  
+  exp <- AverageExpression(sub_obj, assays = "RNA")$RNA %>%
+    as.data.frame() %>%
+    rownames_to_column(var = "gene")
+  
+  names(exp)[2:3] <- paste0("exp_", names(exp)[2:3])
+  
+  mks <- mks %>% 
+    as.data.frame() %>%
+    mutate(gene = row.names(.),
+           cluster = c) %>%
+    left_join(exp)
+  deg <- bind_rows(deg, mks)
+  print(head(deg))
+}
+
+head(deg)
+
+write_csv(deg, file = paste0("./revisedDataset/", proj_name, '_DEG_clusterNamed_FLCvsNML-MAST.csv'))
+```
+
+
+## Session info
+
+```{r session-info}
+
+sessionInfo()
+
+```

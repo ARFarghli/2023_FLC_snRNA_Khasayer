@@ -17,7 +17,6 @@ knitr::opts_chunk$set(echo = TRUE)
 **Note:** This step was performed on a BioHPC "medium gen2: 40 cores, 256GB RAM" machine. I also performed this step on R 4.1.3, as R 4.2.1 cannot load the "stats" package for downstream steps
 
 ```{r load-libraries}
-library(stringr)
 library(Seurat)
 library(tidyverse)
 library(openxlsx)
@@ -363,8 +362,8 @@ flc.combined.sct <- readRDS("decoupled-integration/rds/FLCvNML_Neighbors.rds")
 ```
 
 ```{r}
-DimPlot(flc.combined.sct, reduction = "umap", split.by = "status")
-DimPlot(flc.combined.sct, reduction = "umap", label = T)
+DimPlot(flc.combined.sct, reduction = "umap", split.by = "status", raster = FALSE)
+DimPlot(flc.combined.sct, reduction = "umap", label = T, raster = FALSE)
 ```
 
 ```{r}
@@ -425,11 +424,11 @@ harmonized.seurat <- harmonized_seurat %>%
 ```
 
 ```{r Visualize}
-plt1 <- DimPlot(harmonized.seurat, reduction = "umap", label = T)
-plt2 <- DimPlot(harmonized.seurat, reduction = "umap", group.by = "status")
-plt3 <- DimPlot(harmonized.seurat, reduction = "umap", group.by = "id")
+plt1 <- DimPlot(harmonized.seurat, reduction = "umap", label = T, raster = FALSE)
+plt2 <- DimPlot(harmonized.seurat, reduction = "umap", group.by = "status", raster = FALSE)
+plt3 <- DimPlot(harmonized.seurat, reduction = "umap", group.by = "id", raster = FALSE)
 plt1 / plt2 / plt3
-dir.create("UMAPs/metadata/harmony")
+dir.create("./revisedDataUMAPs/metadata/harmony")
 ggsave(paste0("UMAPs/metadata/harmony/", proj_name, '_umap-metadata.png'), units = 'in', width = 6, height = 15, dpi = 250)
 ```
 
