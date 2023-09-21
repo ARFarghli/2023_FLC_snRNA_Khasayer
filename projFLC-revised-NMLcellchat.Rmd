@@ -1,12 +1,13 @@
 ---
-title: "FLC subset cellchat analysis"
+title: "NML cellchat analysis"
 output: html_document
-date: "2023-09-08"
+date: "2023-09-20"
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
 
 ```{r load-libraries}
 library(Seurat)
@@ -32,20 +33,19 @@ cellchat <- readRDS(file = "./revisedDataset/rds/scRNA_FLC-cellchat2.rds")
 
 ### Split FLC and NML
 
-```{r}
 split.list <- SplitObject(harmonized.seurat, split.by = "status")
 nml <- split.list[["NML"]]
-flc <- split.list[["FLC"]]
-flc <- readRDS("./revisedDataset/rds/flcSeurat.rds")
+nml <- readRDS("./revisedDataset/rds/nmlSeurat.rds")
+# saveRDS(nml, "./revisedDataset/rds/nmlSeurat.rds")
 ```
 
 ```{r}
-labels <- Idents(flc)
+labels <- Idents(nml)
 meta <- data.frame(group = labels, row.names = names(labels))
 ```
 
 ```{r Create a CellChat object}
-cellchat <- createCellChat(object = flc)
+cellchat <- createCellChat(object = nml)
 ```
 
 ```{r Add cell information into meta slot of the object}
@@ -69,19 +69,19 @@ cellchat@DB <- CellChatDB.use
 ```{r Preprocessing the expression data for cell-cell communication analysis}
 # subset the expression data of signaling genes for saving computation cost
 cellchat <- subsetData(cellchat) # This step is necessary even if using the whole database
-future::plan("multisession", workers = 85) # do parallel
+future::plan("multisession", workers = 50) # do parallel
 cellchat <- identifyOverExpressedGenes(cellchat)
 cellchat <- identifyOverExpressedInteractions(cellchat)
 cellchat <- projectData(cellchat, PPI.human)
-saveRDS(cellchat, "./revisedDataset/rds/scRNA-FLC-revised_cellchat.rds")
-cellchat <- readRDS("./revisedDataset/rds/scRNA_revised_cellchat.rds")
+saveRDS(cellchat, "./revisedDataset/rds/scRNA-NML-revised_cellchat.rds")
+# cellchat <- readRDS("./revisedDataset/rds/scRNA-NML-revised_cellchat.rds")
 ```
 
 ```{r}
 cellchat <- computeCommunProb(cellchat)
-saveRDS(cellchat, "./revisedDataset/rds/scRNA_FLC-cellchat2.rds")
+# saveRDS(cellchat, "./revisedDataset/rds/scRNA_NML-cellchat2.rds")
 # Load cellchat data
-cellchat <- readRDS(file = "./revisedDataset/rds/scRNA_FLC-cellchat2.rds")
+cellchat <- readRDS(file = "./revisedDataset/rds/scRNA_NML-cellchat2.rds")
 #> triMean is used for calculating the average gene expression per cell group. 
 #> [1] ">>> Run CellChat on sc/snRNA-seq data <<< [2022-11-26 08:34:38]"
 #> [1] ">>> CellChat inference is done. Parameter values are stored in `object@options$parameter` <<< [2022-11-26 08:35:36]"
@@ -94,7 +94,7 @@ cellchat <- computeCommunProbPathway(cellchat)
 ```
 
 ```{r Calculate the aggregated cell-cell communication network}
-dir.create("./revisedDataset/cellChat/FLC")
+dir.create("./revisedDataset/cellChat/NML")
 cellchat <- aggregateNet(cellchat)
 groupSize <- as.numeric(table(cellchat@idents)) # number of cells in each cell group
 levels(cellchat@idents)
@@ -104,13 +104,13 @@ levels(cellchat@idents)
 df.net <- subsetCommunication(cellchat)
 df_net <- subsetCommunication(cellchat, signaling = c(unique(df.net$pathway_name)), slot.name = "net")
 df_net
-write.csv(df.net, "./revisedDataset/cellChat/FLC/cellChat-allInferredCommunications.csv")
-write.csv(df_net, "./revisedDataset/cellChat/FLC/cellChat-upregulatedPathways-ofInterest.csv")
+write.csv(df.net, "./revisedDataset/cellChat/NML/cellChat-allInferredCommunications.csv")
+write.csv(df_net, "./revisedDataset/cellChat/NML/cellChat-upregulatedPathways-ofInterest.csv")
 ```
 
 ## Calculate the aggregated cell-cell communication network
 ```{r}
-dir.create("./revisedDataset/cellChat/FLC/plots")
+dir.create("./revisedDataset/cellChat/NML/plots")
 groupSize <- as.numeric(table(cellchat@idents))
 par(mfrow = c(1,2), xpd=TRUE)
 netVisual_circle(cellchat@net$count, vertex.weight = groupSize, weight.scale = T, label.edge= F, title.name = "Number of interactions", shape = "circle", vertex.label.cex = .8, margin = .5)
@@ -118,38 +118,30 @@ netVisual_circle(cellchat@net$weight, vertex.weight = groupSize, weight.scale = 
 ```
 
 ```{r}
-png("./revisedDataset/cellChat/FLC/plots/aggregatedCommunicationNetwork_NumberofInteractions_count.png", width = 6, height = 6, units = "in", res = 300)  # Adjust dimensions and resolution
-netVisual_circle(cellchat@net$count, vertex.weight = groupSize, weight.scale = T, label.edge= F, title.name = "FLC subset:Number of interactions", shape = "circle", vertex.label.cex = .8, margin = .5)
+png("./revisedDataset/cellChat/NML/plots/aggregatedCommunicationNetwork_NumberofInteractions_count.png", width = 6, height = 6, units = "in", res = 300)  # Adjust dimensions and resolution
+netVisual_circle(cellchat@net$count, vertex.weight = groupSize, weight.scale = T, label.edge= F, title.name = "NML subset:Number of interactions", shape = "circle", vertex.label.cex = .8, margin = .5)
 dev.off()
 ```
 
 ```{r}
-png("./revisedDataset/cellChat/FLC/plots/aggregatedCommunicationNetwork_NumberofInteractions_weight.png", width = 6, height = 6, units = "in", res = 300)  # Adjust dimensions and resolution
-netVisual_circle(cellchat@net$weight, vertex.weight = groupSize, weight.scale = T, label.edge= F, title.name = "FLC subset:Interaction weights/strength", vertex.label.cex = .8, margin = .5)
+png("./revisedDataset/cellChat/NML/plots/aggregatedCommunicationNetwork_NumberofInteractions_weight.png", width = 6, height = 6, units = "in", res = 300)  # Adjust dimensions and resolution
+netVisual_circle(cellchat@net$weight, vertex.weight = groupSize, weight.scale = T, label.edge= F, title.name = "NML subset:Interaction weights/strength", vertex.label.cex = .8, margin = .5)
 dev.off()
 ```
 
 
-```{r}
-mat <- cellchat@net$weight
-par(mfrow = c(3,4), xpd=TRUE)
-for (i in 1:nrow(mat)) {
-  mat2 <- matrix(0, nrow = nrow(mat), ncol = ncol(mat), dimnames = dimnames(mat))
-  mat2[i, ] <- mat[i, ]
-  netVisual_circle(mat2, vertex.weight = groupSize, weight.scale = T, edge.weight.max = max(mat), title.name = rownames(mat)[i])
-}
-```
 
 ```{r}
 # Iterate through each row in mat
-dir.create("./revisedDataset/cellChat/FLC/plots/cellTypeSignaling/")
+dir.create("./revisedDataset/cellChat/NML/plots/cellTypeSignaling/")
+mat <- cellchat@net$weight
 for (i in 1:nrow(mat)) {
   # Create a new matrix with zeros and set the current row values
   mat2 <- matrix(0, nrow = nrow(mat), ncol = ncol(mat), dimnames = dimnames(mat))
   mat2[i, ] <- mat[i, ]
   
   # Define the output file name
-  output_filename <- paste0("./revisedDataset/cellChat/FLC/plots/cellTypeSignaling/", "FLCsubset-aggregatedCommunicationNetwork_byCell_weight", i, ".png")
+  output_filename <- paste0("./revisedDataset/cellChat/NML/plots/cellTypeSignaling/", "NMLsubset-aggregatedCommunicationNetwork_byCell_weight", i, ".png")
   
   # Open a new graphics device and save the plot
   png(output_filename, width = 6, height = 6, units = "in", res = 300)
@@ -165,9 +157,9 @@ for (i in 1:nrow(mat)) {
 cellchat@netP$pathways
 # Access all the signaling pathways showing significant communications
 pathways.show.all <- cellchat@netP$pathways
-dir.create("./revisedDataset/cellChat/FLC/plots/pathwayDissections/")
+dir.create("./revisedDataset/cellChat/NML/plots/pathwayDissections/")
 for (i in pathways.show.all) {
-  dir.create(paste0("./revisedDataset/cellChat/FLC/plots/pathwayDissections/", i))
+  dir.create(paste0("./revisedDataset/cellChat/NML/plots/pathwayDissections/", i))
   }
 ```
 
@@ -182,14 +174,14 @@ par(mfrow=c(1,1))
 ```
 
 ```{r}
-png("./revisedDataset/cellChat/FLC/plots/pathwayDissections/VEGF/aggregatedCommunicationNetwork_FLCsubset_VEGF.png", width = 6, height = 6, units = "in", res = 300)  # Adjust dimensions and resolution
+png("./revisedDataset/cellChat/NML/plots/pathwayDissections/VEGF/aggregatedCommunicationNetwork_NMLsubset_VEGF.png", width = 6, height = 6, units = "in", res = 300)  # Adjust dimensions and resolution
 netVisual_aggregate(cellchat, signaling = pathways.show, layout = "circle")
 dev.off()
 ```
 
 ```{r}
 par(mfrow=c(1,1))
-png("./revisedDataset/cellChat/FLC/plots/pathwayDissections/VEGF/aggregatedCommunicationNetwork_FLCsubset_VEGF_chord.png", width = 6, height = 6, units = "in", res = 300)  # Adjust dimensions and resolution
+png("./revisedDataset/cellChat/NML/plots/pathwayDissections/VEGF/aggregatedCommunicationNetwork_NMLsubset_VEGF_chord.png", width = 6, height = 6, units = "in", res = 300)  # Adjust dimensions and resolution
 netVisual_aggregate(cellchat, signaling = pathways.show, layout = "chord")
 dev.off()
 ```
@@ -209,7 +201,7 @@ vertex.receiver = seq(3)
 # Loop through pathways and save images in their respective directories
 for (i in 1:length(pathways.show.all)) {
   pathway_dir <- pathways.show.all[i]
-  dir_path <- paste0("./revisedDataset/cellChat/FLC/plots/pathwayDissections/", pathway_dir)
+  dir_path <- paste0("./revisedDataset/cellChat/NML/plots/pathwayDissections/", pathway_dir)
 
   # Visualize communication network associated with both signaling pathway and individual L-R pairs
   netVisual(cellchat, signaling = pathway_dir, vertex.receiver = vertex.receiver, layout = "hierarchy")
@@ -218,7 +210,7 @@ for (i in 1:length(pathways.show.all)) {
   gg <- netAnalysis_contribution(cellchat, signaling = pathway_dir)
 
   # Specify the full path for saving the image
-  image_filename <- paste0(dir_path, "/", pathway_dir, "_FLCsubset_L-R_contribution.pdf")
+  image_filename <- paste0(dir_path, "/", pathway_dir, "_NMLsubset_L-R_contribution.pdf")
 
   # Save the image in the pathway-specific directory
   ggsave(filename = image_filename, plot = gg, width = 5, height = 2, units = 'in', dpi = 300)

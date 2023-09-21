@@ -45,11 +45,13 @@ treemap_counts <- table(harmonized.seurat$status, harmonized.seurat$cluster_name
 
 treemap_flc <- treemap_counts %>% 
   filter(Status == "FLC") %>% 
-  mutate(Proportion = Freq/sum(Freq)*100)
+  mutate(Proportion = Freq/sum(Freq)*100) %>% 
+  slice(c(-5,-11))
 
 treemap_nml <- treemap_counts %>% 
   filter(Status == "NML") %>% 
-  mutate(Proportion = Freq/sum(Freq)*100)
+  mutate(Proportion = Freq/sum(Freq)*100) %>% 
+  slice(c(-5,-11))
 ```
 
 ```{r}
@@ -62,7 +64,7 @@ treemap_flc_plot <- ggplot(treemap_flc, aes(area = Freq, fill = Cluster,
        caption = "Source: Khasayer Lab") +
   theme_minimal()
 
-treemap_flc_plot + ggsave("revisedDataset/proportions/flc_treemap.png", width = 9, height = 5, units = "in", dpi = 600)
+treemap_flc_plot + ggsave("revisedDataset/proportions/flc_treemap-removedClusters4_11.png", width = 9, height = 5, units = "in", dpi = 600)
 ```
 
 ```{r}
@@ -75,6 +77,6 @@ treemap_nml_plot <- ggplot(treemap_nml, aes(area = Freq, fill = Cluster,
        caption = "Source: Khasayer Lab") +
   theme_minimal()
 
-treemap_nml_plot + ggsave("revisedDataset/proportions/nml_treemap.png", width = 9, height = 5, units = "in", dpi = 600)
+treemap_nml_plot + ggsave("revisedDataset/proportions/nml_treemap-removedClusters4_11.png", width = 9, height = 5, units = "in", dpi = 600)
 ```
 
