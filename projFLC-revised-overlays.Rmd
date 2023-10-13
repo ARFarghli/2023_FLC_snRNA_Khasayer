@@ -46,4 +46,27 @@ for (gene in c("CXCR4", "CXCL12")) {
 }
 ```
 
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("PDGFA", "PDGFRA", "AGT", "AGTR1")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.5, split.by = "status", ncol = 4, label = TRUE, repel = TRUE)
+  ggsave(paste0("./revisedDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-named.png"), units = "in", width = 18, height = 10, dpi = 300)
+}
+```
 
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("CXCL16", "CXCR6")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4, label = TRUE)
+  ggsave(paste0("./revisedDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-named.png"), units = "in", width = 18, height = 10, dpi = 300)
+}
+```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("LOX")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4, label = TRUE,
+              repel = TRUE)
+  ggsave(paste0("./revisedDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-named.png"), units = "in", width = 18, height = 10, dpi = 300)
+}
+```

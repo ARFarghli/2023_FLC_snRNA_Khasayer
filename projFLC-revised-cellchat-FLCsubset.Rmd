@@ -31,6 +31,7 @@ cellchat <- readRDS(file = "./revisedDataset/rds/scRNA_FLC-cellchat2.rds")
 ## To observe features of cell to cell communication in just FLC cells, we will split our seurat object by status
 
 ### Split FLC and NML
+```
 
 ```{r}
 split.list <- SplitObject(harmonized.seurat, split.by = "status")

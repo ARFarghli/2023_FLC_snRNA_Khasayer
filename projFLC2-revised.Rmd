@@ -229,9 +229,9 @@ harmonized.seurat <- RenameIdents(harmonized.seurat, new.cluster.ids)
 harmonized.seurat[["cluster_named"]] <- Idents(harmonized.seurat)
 
 
-DimPlot(harmonized.seurat, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend()
+DimPlot(harmonized.seurat, reduction = "umap", label = TRUE, pt.size = 0.5, repel = TRUE) + NoLegend()
 ggsave(paste0("./revisedDataset/UMAPs/metadata/harmony/", proj_name, "_umap_clusterNamed.png"), units = 'in', width = 6, height = 6, dpi = 250)
-DimPlot(harmonized.seurat, reduction = "umap", split.by = "status", label = TRUE, pt.size = 0.5) + NoLegend()
+DimPlot(harmonized.seurat, reduction = "umap", split.by = "status", label = TRUE, pt.size = 0.5, repel = TRUE) + NoLegend()
 ggsave(paste0("./revisedDataset/UMAPs/metadata/harmony/", proj_name, "_umap_clusterNamed-split.png"), units = 'in', width = 10, height = 6, dpi = 250)
 
 
