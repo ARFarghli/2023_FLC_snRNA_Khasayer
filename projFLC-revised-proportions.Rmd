@@ -41,17 +41,17 @@ ggsave("./revisedDataset/proportions/Percent-cell-in-cluster-bySeuratCluster.png
 ```{r}
 treemap_counts <- table(harmonized.seurat$status, harmonized.seurat$cluster_named) %>% 
   as.data.frame() %>% 
-  rename(Status = Var1, Cluster = Var2) 
+  dplyr::rename(Status = Var1, Cluster = Var2) 
 
 treemap_flc <- treemap_counts %>% 
-  filter(Status == "FLC") %>% 
-  mutate(Proportion = Freq/sum(Freq)*100) %>% 
-  slice(c(-5,-11))
+  dplyr::filter(Status == "FLC") %>% 
+  dplyr::mutate(Proportion = Freq/sum(Freq)*100) %>% 
+  dplyr::slice(c(-5,-11))
 
 treemap_nml <- treemap_counts %>% 
-  filter(Status == "NML") %>% 
-  mutate(Proportion = Freq/sum(Freq)*100) %>% 
-  slice(c(-5,-11))
+  dplyr::filter(Status == "NML") %>% 
+  dplyr::mutate(Proportion = Freq/sum(Freq)*100) %>% 
+  dplyr::slice(c(-5,-11))
 ```
 
 ```{r}

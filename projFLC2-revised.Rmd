@@ -227,12 +227,27 @@ names(new.cluster.ids) <- levels(harmonized.seurat)
 harmonized.seurat <- RenameIdents(harmonized.seurat, new.cluster.ids)
 
 harmonized.seurat[["cluster_named"]] <- Idents(harmonized.seurat)
+```
 
+```{r Change color scheme}
+levels(Idents(harmonized.seurat))
+cols <- c("Liver epithelial cells 1" = "#0072B2",
+             "Liver epithelial cells 2" = "#cab2d6",
+             "Endothelial cells" = "#6a3d9a",
+             "Liver epithelial cells 3" = "#DDCC77",
+             "Liver epithelial cells 4" = "#ff7f00",
+             "Stellate cells" = "#33a02c",
+             "Liver epithelial cells 5" = "#AA4499",
+             "Cholangiocyte cells" = "#CC6677",
+             "Neutrophils and macrophages" = "#44AA99",
+             "Lymphocytes" = "#8C87E6",
+             "Liver epithelial 6" = "#FF6B6B",
+             "Unknown" = "#b15928")
 
-DimPlot(harmonized.seurat, reduction = "umap", label = TRUE, pt.size = 0.5, repel = TRUE) + NoLegend()
-ggsave(paste0("./revisedDataset/UMAPs/metadata/harmony/", proj_name, "_umap_clusterNamed.png"), units = 'in', width = 6, height = 6, dpi = 250)
-DimPlot(harmonized.seurat, reduction = "umap", split.by = "status", label = TRUE, pt.size = 0.5, repel = TRUE) + NoLegend()
-ggsave(paste0("./revisedDataset/UMAPs/metadata/harmony/", proj_name, "_umap_clusterNamed-split.png"), units = 'in', width = 10, height = 6, dpi = 250)
+DimPlot(harmonized.seurat, reduction = "umap", label = TRUE, pt.size = 0.5, repel = TRUE, cols = cols) + NoLegend()
+ggsave(paste0("./revisedDataset/UMAPs/metadata/harmony/", proj_name, "_umap_clusterNamed.png"), units = 'in', width = 6, height = 6, dpi = 600)
+DimPlot(harmonized.seurat, reduction = "umap", split.by = "status", label = TRUE, pt.size = 0.5, repel = TRUE, cols = cols) + NoLegend()
+ggsave(paste0("./revisedDataset/UMAPs/metadata/harmony/", proj_name, "_umap_clusterNamed-split.png"), units = 'in', width = 10, height = 6, dpi = 600)
 
 
 # Save a cluster named and a cluster named without immune
