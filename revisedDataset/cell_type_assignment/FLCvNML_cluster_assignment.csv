@@ -1,13 +1,13 @@
 ﻿cluster,assignment
-0,Epithelial 1
-1,Epithelial 2
-2,Endothelial
-3,Epithelial 3
-4,Epithelial 4
-5,Stellate
-6,Epithelial 5
-7,Cholangiocyte
-8,Macrophages
+0,Liver epithelial cells 1
+1,Liver epithelial cells 2
+2,Endothelial cells
+3,Liver epithelial cells 3
+4,Liver epithelial cells 4
+5,Stellate cells
+6,Liver epithelial cells 5
+7,Cholangiocyte cells
+8,Neutrophils and macrophages
 9,Lymphocyte
-10,Epithelial 6
+10,Liver epithelial 6
 11,Unknown
