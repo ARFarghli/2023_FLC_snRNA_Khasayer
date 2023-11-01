@@ -8,16 +8,91 @@ date: "2023-08-07"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
 ```{r}
+library(Seurat)
+library(tidyverse)
 library(dplyr)
 library(ggplot2)
 library(reshape2)
 library(treemapify)
 ```
 
+```{r find-markers, warning=F, message=F}
+set.seed(1234)
+proj_name <- "FLCvNML"
+```
+
 ```{r}
-sample_cluster_counts <- table(harmonized.seurat$seurat_clusters, harmonized.seurat$id)
+harmonized.seurat <- readRDS('./revisedDataset/rds/FLCvNML_Named-obj.rds')
+```
+
+```{r}
+new_metadata <- data.frame(
+  SampleID = colnames(harmonized.seurat),
+  NewColumn = c("Value1", "Value2", "Value3")  # Replace with your new metadata values
+)
+```
+
+```{r}
+patient.id.status <- data.frame(id = c(unique(harmonized.seurat@meta.data[["id"]])),
+                                `Patient-Status` = c("Patient 1:NML", "Patient 2:NML", "Patient 3:NML", "Patient 4:NML", 
+                                                     "Patient 5:FLC-Pri", "Patient 1: FLC-Pri", "Patient 2:FLC-Pri", "Patient 4:FLC-Pri", "Patient 6:FLC-Pri", "Patient 7:FLC-Pri"))
+```
+
+```{r Gernerate count and percent dataframes of patient per cluster}
+count_per_cluster <- as.data.frame(table(harmonized.seurat$cluster_id_named, harmonized.seurat$id)) %>% 
+  dplyr::rename(Cluster = "Var1") %>% 
+  dplyr::rename(id = "Var2") %>% 
+  dplyr::rename(Count = "Freq") %>% 
+  right_join(patient.id.status, by = "id")
+  
+percent_per_cluster <- as.data.frame(prop.table(table(harmonized.seurat$cluster_id_named, harmonized.seurat$id), margin = 1)) %>% 
+  dplyr::rename(Cluster = "Var1") %>% 
+  dplyr::rename(id = "Var2") %>% 
+  dplyr::rename(Fraction = "Freq") %>% 
+  dplyr::mutate(Percent = (Fraction * 100)) %>% 
+  right_join(patient.id.status, by = "id")
+
+percent_per_patient <- as.data.frame(prop.table(table(harmonized.seurat$cluster_id_named, harmonized.seurat$id), margin = 2)) %>% 
+  dplyr::rename(Cluster = "Var1") %>% 
+  dplyr::rename(id = "Var2") %>% 
+  dplyr::rename(Fraction = "Freq") %>% 
+  dplyr::mutate(Percent = (Fraction * 100)) %>% 
+  right_join(patient.id.status, by = "id")
+
+count_per_cluster <- separate(count_per_cluster, col = `Patient.Status`, into = c("Patient", "TissueStatus"), sep = ":", remove = FALSE)
+percent_per_cluster <- separate(percent_per_cluster, col = `Patient.Status`, into = c("Patient", "TissueStatus"), sep = ":", remove = FALSE)
+percent_per_patient <- separate(percent_per_patient, col = `Patient.Status`, into = c("Patient", "TissueStatus"), sep = ":", remove = FALSE)
+
+write.csv(count_per_cluster, "./revisedDataset/proportions/Proportions-patient-per-cluster-count-NAMED.csv")
+write.csv(percent_per_cluster, "./revisedDataset/proportions/Proportions-patient-per-cluster-percent-NAMED.csv")
+write.csv(percent_per_patient, "./revisedDataset/proportions/Proportions-cluster-per-patient-percent-NAMED.csv")
+```
+
+```{r Reorder x-axis for barplot}
+# To make the the bargraph easily interpretable, we will reorder the Clusters to sequential order from lexicographic order.
+
+## For counts
+### Define the desired order of levels. We will do this by size order
+cluster_sizes <- count_per_cluster %>%
+  dplyr::group_by(Cluster) %>%
+  dplyr::summarise(TotalSize = sum(Count)) %>%
+  dplyr::arrange(desc(TotalSize))  # Arrange in descending order of size
+
+### Reorder the levels of the "Cluster" factor based on their total sizes.
+count_per_cluster$Cluster <- factor(count_per_cluster$Cluster, levels = cluster_sizes$Cluster)
+
+### It should now be in sequential order
+levels(count_per_cluster$Cluster)
+```
+
+
+```{r}
+dir.create(ggsave("./revisedDataset/proportions/Percent-cell-in-cluster-bySeuratCluster.png", width = 9, height = 5, units = "in", dpi = 600))
+```
+
+```{r}
+sample_cluster_counts <- table(harmonized.seurat$cluster_id_named, harmonized.seurat$id)
 sample_cluster_percent <- prop.table(sample_cluster_counts, margin = 1)
 ```
 
@@ -27,7 +102,7 @@ sample_cluster_df <- as.data.frame(sample_cluster_percent) %>%
 ```
 
 ```{r}
-ggplot(sample_cluster_df, aes(x = Cluster, y = Freq, fill = ID)) +
+ggplot(sample_cluster_df, aes(x = Cluster, y = Freq, fill = id)) +
   geom_bar(stat = "identity") +
   labs(title = "Percentage of Cells from Each Sample in Each Cluster",
        x = "Cluster",
@@ -36,6 +111,120 @@ ggplot(sample_cluster_df, aes(x = Cluster, y = Freq, fill = ID)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
 
 ggsave("./revisedDataset/proportions/Percent-cell-in-cluster-bySeuratCluster.png", width = 9, height = 5, units = "in", dpi = 600)
+```
+
+```{r}
+custom_order <- c("Patient 1: FLC-Pri", "Patient 2:FLC-Pri", "Patient 4:FLC-Pri", "Patient 5:FLC-Pri", "Patient 6:FLC-Pri", "Patient 7:FLC-Pri", "Patient 1:NML", "Patient 2:NML", "Patient 3:NML", "Patient 4:NML")
+
+count_per_cluster$`Patient.Status` <- factor(percent_per_cluster$`Patient.Status`, levels = custom_order)
+percent_per_cluster$`Patient.Status` <- factor(percent_per_cluster$`Patient.Status`, levels = custom_order)
+percent_per_patient$`Patient.Status` <- factor(percent_per_patient$`Patient.Status`, levels = custom_order)
+levels(percent_per_cluster$`Patient.Status`)
+levels(count_per_cluster$`Patient.Status`)
+levels(percent_per_patient$`Patient.Status`)
+```
+
+```{r Graph Count per cluster}
+p1 <- ggplot(count_per_cluster, aes(x = Cluster, y = Count, fill = `Patient.Status`)) +
+  geom_col(color = 'black') +
+  theme_classic() +
+  ylim(c(0, max(cluster_sizes$TotalSize))) + 
+  theme(plot.margin = margin(1, 1, 1, 1, "in"),
+        axis.text.x = element_text(angle = 60,
+                                   hjust = 1,
+                                   size = 10,
+                                   face = "bold")) +
+          scale_fill_manual(values = c("#0072B2", #1
+                             "#D55E00", #2
+                             "#009E73", #3
+                             "#CC79A7",  #4
+                             "#926B40", #5
+                             "#56B4E9", #6
+                             "#E69F00",#7
+                             "#F0E442", #8
+                             "#009E73",  #9
+                             "#0072B2", #10
+                             "#D55E00", #11
+                             "#DDCC77", #12
+                             "#CC6677", #13
+                             "#AA4499", #14
+                             "#882255",  #15
+                             "#44AA99", #16
+                             "#8A9FD1",#17
+                             "#C06CAB", #18
+                             "#89C75F", #19
+                             "#9983BD", #20
+                             "#F37B7D", #21
+                             "#3BBCA8")) #22
+
+p1 + ggsave(filename = "./revisedDataset/proportions/Proportions-count-per-cluster-NAMED-manualColors.png", width = 10, height = 10) 
+```
+
+```{r Graph cell-type percent per patient-sample}
+p2 <- ggplot(percent_per_patient, aes(x = `Patient.Status`, y = Percent, fill = `Cluster`)) +
+  geom_col(color = 'black') +
+  theme_classic() +
+  ylim(c(0, 101)) + 
+  theme(plot.margin = margin(1, 1, 1, 1, "in"),
+        axis.text.x = element_text(angle = 60,
+                                   hjust = 1,
+                                   size = 10,
+                                   face = "bold")) +
+  scale_fill_manual(values = c("#33a02c",
+                    "#763D24",
+                    "#8C87E6",
+                    "#66C4A4",
+                    "#6a3d9a",
+                    "#1f78b4",
+                    "#ff7f00",
+                    "#AF6E4D",
+                    "#cab2d6",
+                    "#fdbf6f",
+                    "#a6cee3",
+                    "#b2df8a", 
+                    "#FF6B6B",
+                    "#B22222",
+                    "#b15928",
+                    "#FFDB58"))
+
+p2 + ggsave(filename = "./revisedDataset/proportions/Proportions-cluster-percent-by-PatientStatus-NAMED-manualColors.png", width = 10, height = 10)
+```
+
+```{r Graph Patient-status percent by cluster}
+p3 <- percent_per_cluster %>%
+  ggplot(., aes(Cluster, Percent, fill = `Patient.Status`)) +
+  geom_col(color = 'black') +
+  theme_classic() +
+  ylim(c(0,101)) + 
+  theme(plot.margin = margin(1, 1, 1, 1, "in"),
+        axis.text.x = element_text(angle = 60,
+                                   hjust = 1,
+                                   size = 10,
+                                   face = "bold")) + 
+  scale_fill_manual(values = c("#0072B2", #1
+                             "#D55E00", #2
+                             "#009E73", #3
+                             "#CC79A7",  #4
+                             "#926B40", #5
+                             "#56B4E9", #6
+                             "#E69F00",#7
+                             "#F0E442", #8
+                             "#009E73",  #9
+                             "#0072B2", #10
+                             "#D55E00", #11
+                             "#DDCC77", #12
+                             "#CC6677", #13
+                             "#AA4499", #14
+                             "#882255",  #15
+                             "#44AA99", #16
+                             "#8A9FD1",#17
+                             "#C06CAB", #18
+                             "#89C75F", #19
+                             "#9983BD", #20
+                             "#F37B7D", #21
+                             "#3BBCA8" #22
+                             )) 
+p3 + ggsave(filename = "./revisedDataset/proportions/Proportions-PatientStatus-percent-by-Cluster-NAMED-manualColors.png", width = 10, height = 10)
 ```
 
 ```{r}
