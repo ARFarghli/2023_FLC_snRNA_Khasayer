@@ -235,36 +235,71 @@ treemap_counts <- table(harmonized.seurat$status, harmonized.seurat$cluster_name
 treemap_flc <- treemap_counts %>% 
   dplyr::filter(Status == "FLC") %>% 
   dplyr::mutate(Proportion = Freq/sum(Freq)*100) %>% 
-  dplyr::slice(c(-5,-11))
+  dplyr::slice(c(-5,-11)) %>% 
+  mutate(Subgroup = c("Liver epithelial cells", "Liver epithelial cells", "Endothelial cells", "Liver epithelial cells", "Stellate cells", "Liver epithelial cells", "Cholangiocyte cells", "Neutrophils and macrophages", "Lymphocytes", "Unk"))
 
 treemap_nml <- treemap_counts %>% 
   dplyr::filter(Status == "NML") %>% 
   dplyr::mutate(Proportion = Freq/sum(Freq)*100) %>% 
-  dplyr::slice(c(-5,-11))
+  dplyr::slice(c(-5,-11)) %>% 
+  mutate(Subgroup = c("Liver epithelial cells", "Liver epithelial cells", "Endothelial cells", "Liver epithelial cells", "Stellate cells", "Liver epithelial cells", "Cholangiocyte cells", "Neutrophils and macrophages", "Lymphocytes", "Unk"))
 ```
 
 ```{r}
+levels(factor(treemap_flc$Cluster))
+
 treemap_flc_plot <- ggplot(treemap_flc, aes(area = Freq, fill = Cluster,
-                                label = paste0(Cluster, "\nCount: ", Freq, "\nProportion: ", round(Proportion,1)))) +
+                                label = paste0(Cluster, "\nCount: ", Freq, "\nProportion: ", round(Proportion,1)),
+                                subgroup = Subgroup)) +
   geom_treemap() +
-  geom_treemap_text(size = 10, hjust = 0.5, vjust = 0.5, color = "black", fontface = "bold") +
-  labs(title = "Treemap of Relative Cell Proportions within FLC",
-       fill = "Tissue Status",
-       caption = "Source: Khasayer Lab") +
-  theme_minimal()
+  geom_treemap_subgroup_border(colour = "black", size = 5) +
+  geom_treemap_subgroup_text(place = "bottom", grow = F,
+                             alpha = 0.5, colour = "black",
+                             fontface = "italic") +
+  geom_treemap_text(colour = "black",
+                    place = "centre",
+                    size = 10) +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c("#0072B2", #"FLC activated stellate cells"
+                               "#cab2d6", #"FLC cholangiocyte cells"
+                               "#DDCC77", #"FLC endothelial cells"
+                               "#ff7f00", #"FLC lymphocytes"
+                               "#33a02c", #"FLC neutrophils and macrophages"
+                               "#AA4499", #"FLC transformed liver epithelial cells"
+                               "#CC6677",
+                               "#44AA99",
+                               "#FF6B6B",
+                               "#b15928"
+                               ))
 
 treemap_flc_plot + ggsave("revisedDataset/proportions/flc_treemap-removedClusters4_11.png", width = 9, height = 5, units = "in", dpi = 600)
 ```
 
+
 ```{r}
 treemap_nml_plot <- ggplot(treemap_nml, aes(area = Freq, fill = Cluster,
-                                label = paste0(Cluster, "\nCount: ", Freq, "\nProportion: ", round(Proportion,1)))) +
+                                label = paste0(Cluster, "\nCount: ", Freq, "\nProportion: ", round(Proportion,1)),
+                                subgroup = Subgroup)) +
   geom_treemap() +
-  geom_treemap_text(size = 10, hjust = 0.5, vjust = 0.5, color = "black", fontface = "bold") +
-  labs(title = "Treemap of Relative Cell Proportions within NML",
-       fill = "Tissue Status",
-       caption = "Source: Khasayer Lab") +
-  theme_minimal()
+  geom_treemap_subgroup_border(colour = "black", size = 5) +
+  geom_treemap_subgroup_text(place = "bottom", grow = F,
+                             alpha = 0.5, colour = "black",
+                             fontface = "italic") +
+  geom_treemap_text(colour = "black",
+                    place = "centre",
+                    size = 10) +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c("#0072B2", #"FLC activated stellate cells"
+                               "#cab2d6", #"FLC cholangiocyte cells"
+                               "#DDCC77", #"FLC endothelial cells"
+                               "#ff7f00", #"FLC lymphocytes"
+                               "#33a02c", #"FLC neutrophils and macrophages"
+                               "#AA4499", #"FLC transformed liver epithelial cells"
+                               "#CC6677",
+                               "#44AA99",
+                               "#FF6B6B",
+                               "#b15928"
+                               ))
 
 treemap_nml_plot + ggsave("revisedDataset/proportions/nml_treemap-removedClusters4_11.png", width = 9, height = 5, units = "in", dpi = 600)
 ```

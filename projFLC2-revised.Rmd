@@ -257,8 +257,9 @@ saveRDS(harmonized.seurat, paste0("./revisedDataset/rds/", proj_name, '_Named-ob
 ### Find markers of named clusters
 
 ```{r find-markers-named, warning=F}
-
+levels(harmonized.seurat)
 markers <- FindAllMarkers(harmonized.seurat, 
+                          assay = "RNA",
                           min.pct = -Inf, 
                           logfc.threshold = .25, 
                           only.pos = T, 
@@ -268,5 +269,4 @@ markers <- FindAllMarkers(harmonized.seurat,
 markers <- markers %>%
   filter(avg_log2FC > 0.25) %>%
   write_csv(paste0("./revisedDataset/cell_type_assignment/", proj_name, '_HighlyEnrichedMarkers_CLUSTERNAMED_logFC.25_wilcox.csv'))
-
 ```

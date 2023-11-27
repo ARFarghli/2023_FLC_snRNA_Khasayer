@@ -1,0 +1,263 @@
+---
+title: "manuscript figures"
+output: html_document
+date: "2023-11-10"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load-libraries}
+# library(Matrix)cd /
+library(stringr)
+library(Seurat)
+library(tidyverse)
+library(openxlsx)
+library(scDblFinder)
+library(BiocParallel)
+library(ArchR)
+library(clusterProfiler)
+library(org.Hs.eg.db)
+# BiocManager::install("glmGamPoi")
+```
+
+```{r set project}
+set.seed(1234)
+proj_name <- "FLCvNML"
+```
+
+```{r}
+harmonized.seurat <- readRDS('./revisedDataset/rds/FLCvNML_Named-obj.rds')
+```
+
+## Figure 1
+
+### B
+
+```{r Change color scheme}
+levels(Idents(harmonized.seurat))
+cols <- c("Liver epithelial cells 1" = "#0072B2",
+             "Liver epithelial cells 2" = "#cab2d6",
+             "Endothelial cells" = "#6a3d9a",
+             "Liver epithelial cells 3" = "#DDCC77",
+             "Liver epithelial cells 4" = "#ff7f00",
+             "Stellate cells" = "#33a02c",
+             "Liver epithelial cells 5" = "#AA4499",
+             "Cholangiocyte cells" = "#CC6677",
+             "Neutrophils and macrophages" = "#44AA99",
+             "Lymphocytes" = "#8C87E6",
+             "Liver epithelial 6" = "#FF6B6B",
+             "Unknown" = "#b15928")
+
+DimPlot(harmonized.seurat, reduction = "umap", label = FALSE, pt.size = 0.2,  cols = cols, raster = FALSE) +
+  theme(legend.position = "bottom",
+        legend.margin = margin(2.5, 3, 2.5, 2.5),
+        legend.text=element_text(size=7)) +
+  guides(color = guide_legend(title=NULL,
+                              ncol=3, 
+                              nrow=4,
+                              override.aes = list(size = 6, shape = "square")))
+ggsave(paste0("./revisedDataset/UMAPs/metadata/harmony/", proj_name, "_umap_clusterNamed-nonraster.png"), units = 'in', width = 6, height = 6.5, dpi = 600)
+```
+
+```{r}
+DimPlot(harmonized.seurat, reduction = "umap", label = FALSE, pt.size = 0.2,  cols = cols, raster = FALSE, split.by = "status") +
+  theme(legend.position = "bottom",
+        legend.margin = margin(2.5, 3, 2.5, 2.5),
+        legend.text=element_text(size=7)) +
+  guides(color = guide_legend(title=NULL,
+                              ncol=3, 
+                              nrow=4,
+                              override.aes = list(size = 6, shape = "square")))
+ggsave(paste0("./revisedDataset/UMAPs/metadata/harmony/", proj_name, "_umap_clusterNamed-split-nonraster.png"), units = 'in', width = 10, height = 6, dpi = 600)
+```
+
+## Cell type overlay
+
+```{r}
+dir.create("./revisedDataset/UMAPs/celTypeMarkers/noLabel")
+
+for (gene in c("EPCAM", "PKHD1", "FGFR2", "TYROBP", "SRGN", "C1QB", "FYN", "NOSTRIN", "PTPRB", "LDB2", "ACTA2", "CALD1", "NPPB","CYP3A4", "RPS21","RPL4","S100A4","CFL1","TMSB4X","B2M","ACTG1","EEF1B2","COX7C","HNRNPA1","PARP8","MALAT1","CST7","COX4I1","ID2","ARHGAP15","CELF2","PTPRC","RPS27","UQCRB","RPS3","PPIA","TMSB10","FYN", "HNF4A")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, raster = FALSE, order = TRUE)
+  ggsave(paste0("./revisedDataset/UMAPs/celTypeMarkers/noLabel/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-named-noLabel.png"), units = "in", width = 5, height = 5, dpi = 600)
+}
+```
+
+```{r}
+dir.create("./revisedDataset/UMAPs/celTypeMarkers")
+
+for (gene in c("EPCAM", "PKHD1", "FGFR2", "TYROBP", "SRGN", "C1QB", "FYN", "NOSTRIN", "PTPRB", "LDB2", "ACTA2", "CALD1", "NPPB","CYP3A4","RPS21","RPL4","S100A4","CFL1","TMSB4X","B2M","ACTG1","EEF1B2","COX7C","HNRNPA1","PARP8","MALAT1","CST7","COX4I1","ID2","ARHGAP15","CELF2","PTPRC","RPS27","UQCRB","RPS3","PPIA","TMSB10","FYN", "HNF4A")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, order = TRUE)
+  ggsave(paste0("./revisedDataset/UMAPs/celTypeMarkers/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-named.png"), units = "in", width = 5, height = 5, dpi = 600)
+}
+```
+
+## Figure 2
+
+#### Heatmap using complexheatmap
+
+I want to make figures using my seurat object that are similar in quality and format to the ones made in ArchR for the sake of consistency. I found a user uploaded package that would allow me to do this. It is installed below.
+
+```{r}
+devtools::install_github("RyanYip-Kat/yipCat")
+```
+
+```{r}
+DoLikeArchRHeatmap(
+  seurat = harmonized.seurat,
+  groupBy = "cluster_named",
+  N = 30,
+  slot = "scale.data",
+  scale = TRUE,
+  limits = NULL
+)
+```
+
+
+```{r}
+counts <- GetAssayData(harmonized.seurat, assay="SCT", slot="data")
+features = c("VCAN", "SLC16A14", "LINC00473", "PDE10A","FAM19A5", "TMEM163", "OAT", "CA12", "BACE2", "COL4A1",
+    "FAM167A", "GPRIN3", "IRF4", "KIF26B", "TESC",
+    "CD68", # Ross, H. M.et al.Fibrolamellar carcinomas are positive for CD68.Mod. Pathol.24,390–395 (2011)
+    "SOX9", "SOX17", "PDX1", "POU5F1", "SALL4", "SHH", "NANOG", "KLF4", "SOX2", "BMI1", # Oikawa 2015
+    "AGR2", #Wang, Z., Hao, Y. & Lowe, A. W. The adenocarcinoma-associated antigen,AGR2, promotes tumor growth, cell migration, and cellular transformation.Cancer Res.68,492–497  
+    "PCSK1", #Malouf, G. G.et al.Transcriptional profiling of pure fibrolamellarhepatocellular carcinoma reveals an endocrine signature.Hepatology59,2228–2237
+    "KRT7", # Malouf G, Falissard B, Azoulay D, et al. Is histological diagnosis ofprimary liver carcinomas withfibrous stroma reproducibleamong experts? J Clin Pathol 2009;62(06):519–5248Abdul-Al HM, Wang G, Makhlouf HR, Goodman ZD. Fibrolamellarhepatocellular carcinoma: an immunohistochemical comparisonwith conventional hepatocellular carcinoma. Int J Surg Pathol2010;18(05):313–318
+    "TCN1", # D. L. Lildballe, K. Q. T. Nguyen, S. S. Poulsen, H. O. Nielsen,and E. Nexo, “Haptocorrin as marker of disease progressionin �brolamellar hepatocellular carcinoma,”European Journal ofSurgical Oncology
+    "PRKACA", "DNAJB1")
+counts <- as.matrix(counts[rownames(counts) %in% features, ])
+
+metadata <- harmonized.seurat[[]]
+metadata <- metadata[rownames(metadata) %in% colnames(features), ]
+```
+
+
+
+
+
+
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("VCAN", "SLC16A14", "GLI1", "GLI2", "GLI3", "BAG2", "STIP1", "OAT", "OTC", "LDHB", "SDS", "GLS", "ALDH18A1", "PYCR1", "PYCR2", "PRODH", "P4HA2", "CXCR4", "CXCL12", "SOX17", "GLS", "PDGFB", "PDGFRB", "WNT4", "FZD10", "VEGFA", "TGFB3", "TGFBR2", "TGFBR1", "KDR", "FLT1", "CTLA4", "GRAMD1B", "STIM1", "PKD2", "TMCO1", "SLC27A4", "ACSL5", "SLC27A3", "SLC27A2", "SLC27A1", "ACSL6", "CD36", "SLC16A7","SLC16A1", "LDHA", "SLC2A2", "HK2", "GCK", "PFKFB1", "PFKFB2", "G6PD", "TKT", "BPGM", "MINPP1", "ALDOA", "ALDOB", "ALDOC", "PFKP", "PFKL", "PFKM", "PKM", "PKLR", "SLC37A4", "PGK1", "ENO3", "KHK", "GK", "AKR1B1", "GPAM", "GPD1", "GPD1L", "GPD2", "ACLY", "IDH1", "ELOVL5", "BCAT1",  "PTPRB", "NPPB",  "CYP3A4", "FYN", "EPCAM", "PKHD1", "FGFR2", "TYROBP", "SRGN", "C1QB", "NOSTRIN", "PTPRB", "LDB2", "ACTA2", "CALD1", "HNF4A", "ENO3", "KHK", "GK", "AKR1B1", "GPAM", "GPD1", "GPD1L", "GPD2", "ACLY", "IDH1", "ELOVL5", "BCAT1",  "PTPRB", "NPPB",  "CYP3A4", "FYN", "EPCAM", "PKHD1", "FGFR2", "TYROBP", "SRGN", "C1QB", "NOSTRIN", "PTPRB", "LDB2", "ACTA2", "CALD1", "HNF4A", "CXCR4", "CXCL12", "PDGFA", "PDGFRA", "AGT", "AGTR1", "CXCL16", "CXCR6", "LOX", "ERBB2")) {
+  FeaturePlot(harmonized.seurat, features = gene, split.by = "status", label.size = 3, label = FALSE, pt.size = 0.2, order = TRUE)
+  ggsave(paste0("./revisedDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-named.png"), units = "in", width = 9, height = 5, dpi = 600)
+}
+```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("CD68")) {
+  FeaturePlot(harmonized.seurat, features = gene, split.by = "status", label.size = 3, label = FALSE, pt.size = 0.2, order = TRUE)
+  ggsave(paste0("./revisedDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-named.png"), units = "in", width = 9, height = 5, dpi = 600)
+}
+```
+
+## Figure 2
+
+## Figure 4
+
+## Cluster profiler by cell type and status
+
+```{r Load markers}
+markers <- read.csv("./revisedDataset/FLCvNML_DEG_clusterNamed_FLCvsNML-MAST.csv") %>% 
+  dplyr::filter(avg_log2FC >= 0.5 | avg_log2FC <= -0.5, p_val_adj <= 0.05)
+```
+
+```{r Generate EntrezID in markers dataframe}
+geneid <- markers$gene
+markers$entrezid <- AnnotationDbi::select(org.Hs.eg.db,
+                                          keys = geneid, 
+                                          columns = "ENTREZID", 
+                                          keytype = "SYMBOL")
+```
+
+```{r Generate cluster list by celltype and status}
+cluster_names <- levels(harmonized.seurat)
+clusterprofilerlist <- list()
+
+# Loop over each cluster name
+for (cluster_name in cluster_names) {
+  # Subset the genes based on the current cluster for FLC (avg_log2FC >= 0.5)
+  cluster_genes_flc <- subset(markers$entrezid$ENTREZID, markers$cluster == cluster_name & markers$avg_log2FC >= 0.5)[1:100]
+  
+  # Store the subset of genes in the list using the cluster name as the key with the addition of "-FLC"
+  clusterprofilerlist[[paste0(cluster_name, "-FLC")]] <- cluster_genes_flc
+
+  # Subset the genes based on the current cluster for NML (avg_log2FC <= -0.5)
+  cluster_genes_nml <- subset(markers$entrezid$ENTREZID, markers$cluster == cluster_name & markers$avg_log2FC <= -0.5)[1:100]
+
+  # Store the subset of genes in the list using the cluster name as the key with the addition of "-NML"
+  clusterprofilerlist[[paste0(cluster_name, "-NML")]] <- cluster_genes_nml
+}
+```
+
+```{r Complete case}
+# Create an empty list to store the results
+clusterprofilerlist <- list()
+
+# Loop over each cluster name
+for (cluster_name in cluster_names) {
+  # Subset the genes based on the current cluster for FLC (avg_log2FC >= 0.5) and skip "NA" entries
+  cluster_genes_flc <- subset(markers$entrezid$ENTREZID, 
+                              markers$cluster == cluster_name & 
+                              markers$avg_log2FC >= 0.5 & 
+                              complete.cases(markers$entrezid$ENTREZID))[1:100]
+  
+  # Store the subset of genes in the list using the cluster name as the key with the addition of "-FLC"
+  clusterprofilerlist[[paste0(cluster_name, "-FLC")]] <- cluster_genes_flc
+
+  # Subset the genes based on the current cluster for NML (avg_log2FC <= -0.5) and skip "NA" entries
+  cluster_genes_nml <- subset(markers$entrezid$ENTREZID, 
+                              markers$cluster == cluster_name & 
+                              markers$avg_log2FC <= -0.5 & 
+                              complete.cases(markers$entrezid$ENTREZID))[1:100]
+
+  # Store the subset of genes in the list using the cluster name as the key with the addition of "-NML"
+  clusterprofilerlist[[paste0(cluster_name, "-NML")]] <- cluster_genes_nml
+}
+```
+
+### Epithelial 2 cluster comparison
+
+```{r Epi 2 - GO}
+cc.go <- clusterProfiler::compareCluster(geneClusters = clusterprofilerlist[3:4],
+                                         fun = "enrichGO", 
+                                         OrgDb= org.Hs.eg.db, 
+                                         ont= "BP",
+                                         pvalueCutoff=0.05, 
+                                         pAdjustMethod='BH')
+dotplot(cc.go, showCategory = 5) + 
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1, size = 10, face = "bold")) + 
+  theme(axis.text.y = element_text(size = 13)) + 
+  scale_color_viridis(direction = -1, trans="log10") 
+
+ggsave("./revisedDataset/clusterProfiler/clusterProfiler_clusterCompare_Epi2_GO_log2FC0.5-completeCase.png", width = 11, height = 30, units = "in")
+
+write.csv(cc.go@compareClusterResult, "./revisedDataset/clusterProfiler/clusterProfiler_clusterCompare_GO_Epi2_log2FC0.5-completeCase.csv")
+```
+
+```{r Epi 2 - GOS}
+cc.gos <- clusterProfiler::simplify(cc.go, cutoff=0.05, by= "p.adjust")
+dotplot(cc.gos, showCategory = 5) + 
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1, size = 10, face = "bold")) + 
+  theme(axis.text.y = element_text(size = 13)) + 
+  scale_color_viridis(direction = -1, trans="log10") 
+ggsave("./revisedDataset/clusterProfiler/clusterProfiler_Epi2_GOSimplified_log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
+```
+
+```{r Epi 2 - PW}
+cc.pw <- clusterProfiler::compareCluster(geneClusters = clusterprofilerlist[3:4],
+                                         fun = "enrichPathway",
+                                         pvalueCutoff=0.05, 
+                                         pAdjustMethod='BH')
+
+dotplot(cc.pw, showCategory = 5) + 
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1, size = 10, face = "bold")) + 
+  theme(axis.text.y = element_text(size = 13)) + 
+  scale_color_viridis(direction = -1, trans="log10") 
+ggsave("./revisedDataset/clusterProfiler/clusterProfiler_enrichPathway_Epi2-log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
+
+write.csv(cc.pw@compareClusterResult, "./revisedDataset/clusterProfiler/clusterProfiler_enrichPathway_Epi2_log2FC0.5-completeCase.csv")
+```

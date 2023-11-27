@@ -34,11 +34,13 @@ harmonized.seurat <- readRDS('./revisedDataset/rds/FLCvNML_Named-obj.rds')
 ```{r Load markers csv}
 dir.create("./revisedDataset/clusterProfiler")
 markers <- read.csv("./revisedDataset/cell_type_assignment/FLCvNML_HighlyEnrichedMarkers_CLUSTERNAMED_logFC.25_wilcox.csv") %>% 
-  filter(avg_log2FC >= 1.0)
+  filter(avg_log2FC >= 0.5) 
 ```
 
 ```{r Add EntrezID to markers dataframe}
 geneid <- markers$gene
+rows <- nrow(markers)
+markers[rows+6,] <- NA
 markers$entrezid <- AnnotationDbi::select(org.Hs.eg.db,
                                           keys = geneid, 
                                           columns = "ENTREZID", 
@@ -70,9 +72,9 @@ dotplot(cc.go, showCategory = 5) +
   theme(axis.text.y = element_text(size = 13)) + 
   scale_color_viridis(direction = -1, trans="log10") 
 
-ggsave("./revisedDataset/clusterProfiler/clusterProfiler_clusterCompare_GO_log2FC1.0.png", width = 11, height = 30, units = "in")
+ggsave("./revisedDataset/clusterProfiler/geneOntology/clusterProfiler_clusterCompare_GO_log2FC0.5.png", width = 11, height = 30, units = "in")
 
-write.csv(cc.go@compareClusterResult, "./revisedDataset/clusterProfiler/clusterProfiler_clusterCompare_GO_log2FC1.0.csv")
+write.csv(cc.go@compareClusterResult, "./revisedDataset/clusterProfiler/geneOntology/clusterProfiler_clusterCompare_GO_log2FC0.5.csv")
 ```
 
 ```{r GOS}
@@ -81,7 +83,7 @@ dotplot(cc.gos, showCategory = 5) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1, size = 10, face = "bold")) + 
   theme(axis.text.y = element_text(size = 13)) + 
   scale_color_viridis(direction = -1, trans="log10") 
-ggsave("./revisedDataset/clusterProfiler/clusterProfiler_GOSimplified_log2FC1.0.png", width = 11, height = 11, units = "in")
+ggsave("./revisedDataset/clusterProfiler/goSimplified/clusterProfiler_GOSimplified_log2FC0.5.png", width = 11, height = 11, units = "in")
 ```
 
 ```{r PW}
@@ -94,9 +96,9 @@ dotplot(cc.pw, showCategory = 3) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1, size = 10, face = "bold")) + 
   theme(axis.text.y = element_text(size = 13)) + 
   scale_color_viridis(direction = -1, trans="log10") 
-ggsave("./revisedDataset/clusterProfiler/clusterProfiler_enrichPathway_log2FC1.0.png", width = 11, height = 11, units = "in")
+ggsave("./revisedDataset/clusterProfiler/pathwayAnalysis/clusterProfiler_enrichPathway_log2FC0.5.png", width = 11, height = 11, units = "in")
 
-write.csv(cc.pw@compareClusterResult, "./revisedDataset/clusterProfiler/clusterProfiler_enrichPathway_log2FC1.0.csv")
+write.csv(cc.pw@compareClusterResult, "./revisedDataset/clusterProfiler/clusterProfiler_enrichPathway_log2FC0.5.csv")
 ```
 
 ## Cluster profiler by cell type and status
@@ -108,6 +110,8 @@ markers <- read.csv("./revisedDataset/FLCvNML_DEG_clusterNamed_FLCvsNML-MAST.csv
 
 ```{r Generate EntrezID in markers dataframe}
 geneid <- markers$gene
+rows <- nrow(markers)
+markers[rows+7,] <- NA
 markers$entrezid <- AnnotationDbi::select(org.Hs.eg.db,
                                           keys = geneid, 
                                           columns = "ENTREZID", 
@@ -186,7 +190,7 @@ dotplot(cc.gos, showCategory = 5) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1, size = 10, face = "bold")) + 
   theme(axis.text.y = element_text(size = 13)) + 
   scale_color_viridis(direction = -1, trans="log10") 
-ggsave("./revisedDataset/clusterProfiler/clusterProfiler_Epi1_GOSimplified_log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
+ggsave("./revisedDataset/clusterProfiler/clusterProfiler_GOSimplified_Epi1_log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
 ```
 
 ```{r Epi 1 - PW}
@@ -230,7 +234,7 @@ dotplot(cc.gos, showCategory = 5) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1, size = 10, face = "bold")) + 
   theme(axis.text.y = element_text(size = 13)) + 
   scale_color_viridis(direction = -1, trans="log10") 
-ggsave("./revisedDataset/clusterProfiler/clusterProfiler_Epi2_GOSimplified_log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
+ggsave("./revisedDataset/clusterProfiler/clusterProfiler_GOSimplified_Epi2_log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
 ```
 
 ```{r Epi 2 - PW}
@@ -274,7 +278,7 @@ dotplot(cc.gos, showCategory = 5) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1, size = 10, face = "bold")) + 
   theme(axis.text.y = element_text(size = 13)) + 
   scale_color_viridis(direction = -1, trans="log10") 
-ggsave("./revisedDataset/clusterProfiler/clusterProfiler_Endo_GOSimplified_log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
+ggsave("./revisedDataset/clusterProfiler/clusterProfiler_GOSimplified_Endo_log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
 ```
 
 ```{r Endo - PW}
@@ -317,7 +321,7 @@ dotplot(cc.gos, showCategory = 5) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1, size = 10, face = "bold")) + 
   theme(axis.text.y = element_text(size = 13)) + 
   scale_color_viridis(direction = -1, trans="log10") 
-ggsave("./revisedDataset/clusterProfiler/clusterProfiler_Epi3_GOSimplified_log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
+ggsave("./revisedDataset/clusterProfiler/clusterProfiler_GOSimplified_Epi3_log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
 ```
 
 ```{r Epi 3 - PW}
@@ -360,7 +364,7 @@ dotplot(cc.gos, showCategory = 5) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1, size = 10, face = "bold")) + 
   theme(axis.text.y = element_text(size = 13)) + 
   scale_color_viridis(direction = -1, trans="log10") 
-ggsave("./revisedDataset/clusterProfiler/clusterProfiler_Epi4_GOSimplified_log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
+ggsave("./revisedDataset/clusterProfiler/clusterProfiler_GOSimplified_Epi4_log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
 ```
 
 ```{r Epi 4 - PW}
@@ -403,7 +407,7 @@ dotplot(cc.gos, showCategory = 5) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1, size = 10, face = "bold")) + 
   theme(axis.text.y = element_text(size = 13)) + 
   scale_color_viridis(direction = -1, trans="log10") 
-ggsave("./revisedDataset/clusterProfiler/clusterProfiler_Stellate_GOSimplified_log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
+ggsave("./revisedDataset/clusterProfiler/clusterProfiler_GOSimplified_Stellate_log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
 ```
 
 ```{r Stellate - PW}
@@ -425,9 +429,9 @@ write.csv(cc.pw@compareClusterResult, "./revisedDataset/clusterProfiler/clusterP
 
 
 
-### Lymphocyte 1 cluster comparison
+### Epithelial 5 cluster comparison
 
-```{r Lymphocyte 1 - GO}
+```{r Liver epithelial 5 - GO}
 cc.go <- clusterProfiler::compareCluster(geneClusters = clusterprofilerlist[13:14],
                                          fun = "enrichGO", 
                                          OrgDb= org.Hs.eg.db, 
@@ -439,21 +443,21 @@ dotplot(cc.go, showCategory = 5) +
   theme(axis.text.y = element_text(size = 13)) + 
   scale_color_viridis(direction = -1, trans="log10") 
 
-ggsave("./revisedDataset/clusterProfiler/clusterProfiler_clusterCompare_Lymp1_GO_log2FC0.5-completeCase.png", width = 11, height = 30, units = "in")
+ggsave("./revisedDataset/clusterProfiler/clusterProfiler_clusterCompare_Epi5_GO_log2FC0.5-completeCase.png", width = 11, height = 30, units = "in")
 
-write.csv(cc.go@compareClusterResult, "./revisedDataset/clusterProfiler/clusterProfiler_clusterCompare_GO_Lymp1_log2FC0.5-completeCase.csv")
+write.csv(cc.go@compareClusterResult, "./revisedDataset/clusterProfiler/clusterProfiler_clusterCompare_GO_Epi5_log2FC0.5-completeCase.csv")
 ```
 
-```{r Lymphocyte 1 - GOS}
+```{r Epi 5 - GOS}
 cc.gos <- clusterProfiler::simplify(cc.go, cutoff=0.05, by= "p.adjust")
 dotplot(cc.gos, showCategory = 5) + 
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1, size = 10, face = "bold")) + 
   theme(axis.text.y = element_text(size = 13)) + 
   scale_color_viridis(direction = -1, trans="log10") 
-ggsave("./revisedDataset/clusterProfiler/clusterProfiler_Lymp1_GOSimplified_log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
+ggsave("./revisedDataset/clusterProfiler/clusterProfiler_GOSimplified_Epi5_log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
 ```
 
-```{r Lymphocyte 1 - PW}
+```{r Epithelial 5 - PW}
 cc.pw <- clusterProfiler::compareCluster(geneClusters = clusterprofilerlist[13:14],
                                          fun = "enrichPathway",
                                          pvalueCutoff=0.05, 
@@ -463,9 +467,9 @@ dotplot(cc.pw, showCategory = 5) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1, size = 10, face = "bold")) + 
   theme(axis.text.y = element_text(size = 13)) + 
   scale_color_viridis(direction = -1, trans="log10") 
-ggsave("./revisedDataset/clusterProfiler/clusterProfiler_enrichPathway_Lymp1-log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
+ggsave("./revisedDataset/clusterProfiler/clusterProfiler_enrichPathway_Epi5-log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
 
-write.csv(cc.pw@compareClusterResult, "./revisedDataset/clusterProfiler/clusterProfiler_enrichPathway_Lymph1_log2FC0.5-completeCase.csv")
+write.csv(cc.pw@compareClusterResult, "./revisedDataset/clusterProfiler/clusterProfiler_enrichPathway_Epi5_log2FC0.5-completeCase.csv")
 ```
 
 
@@ -494,7 +498,7 @@ dotplot(cc.gos, showCategory = 5) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1, size = 10, face = "bold")) + 
   theme(axis.text.y = element_text(size = 13)) + 
   scale_color_viridis(direction = -1, trans="log10") 
-ggsave("./revisedDataset/clusterProfiler/clusterProfiler_Cholangio_GOSimplified_log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
+ggsave("./revisedDataset/clusterProfiler/clusterProfiler_GOSimplified_Cholangio_log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
 ```
 
 ```{r Cholangiocyte - PW}
@@ -541,7 +545,7 @@ dotplot(cc.gos, showCategory = 5) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1, size = 10, face = "bold")) + 
   theme(axis.text.y = element_text(size = 13)) + 
   scale_color_viridis(direction = -1, trans="log10") 
-ggsave("./revisedDataset/clusterProfiler/clusterProfiler_Macrophages_GOSimplified_log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
+ggsave("./revisedDataset/clusterProfiler/clusterProfiler_GOSimplified_Macrophage_log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
 ```
 
 ```{r Macrophages - PW}
@@ -554,7 +558,7 @@ dotplot(cc.pw, showCategory = 5) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1, size = 10, face = "bold")) + 
   theme(axis.text.y = element_text(size = 13)) + 
   scale_color_viridis(direction = -1, trans="log10") 
-ggsave("./revisedDataset/clusterProfiler/clusterProfiler_enrichPathway_Macropahes-log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
+ggsave("./revisedDataset/clusterProfiler/clusterProfiler_enrichPathway_Macrophages-log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
 
 write.csv(cc.pw@compareClusterResult, "./revisedDataset/clusterProfiler/clusterProfiler_enrichPathway_Macrophages_log2FC0.5-completeCase.csv")
 ```
@@ -565,9 +569,9 @@ write.csv(cc.pw@compareClusterResult, "./revisedDataset/clusterProfiler/clusterP
 
 
 
-### Lymphocyte 2 cluster comparison
+### Lymphocyte cluster comparison
 
-```{r Lymphocyte 2 - GO}
+```{r Lymphocyte - GO}
 cc.go <- clusterProfiler::compareCluster(geneClusters = clusterprofilerlist[19:20],
                                          fun = "enrichGO", 
                                          OrgDb= org.Hs.eg.db, 
@@ -579,21 +583,21 @@ dotplot(cc.go, showCategory = 5) +
   theme(axis.text.y = element_text(size = 13)) + 
   scale_color_viridis(direction = -1, trans="log10") 
 
-ggsave("./revisedDataset/clusterProfiler/clusterProfiler_clusterCompare_Lymph2_GO_log2FC0.5-completeCase.png", width = 11, height = 30, units = "in")
+ggsave("./revisedDataset/clusterProfiler/clusterProfiler_clusterCompare_Lymph_GO_log2FC0.5-completeCase.png", width = 11, height = 30, units = "in")
 
-write.csv(cc.go@compareClusterResult, "./revisedDataset/clusterProfiler/clusterProfiler_clusterCompare_GO_Lymph2_log2FC0.5-completeCase.csv")
+write.csv(cc.go@compareClusterResult, "./revisedDataset/clusterProfiler/clusterProfiler_clusterCompare_GO_Lymph_log2FC0.5-completeCase.csv")
 ```
 
-```{r Lymphocyte 2 - GOS}
+```{r Lymphocyte - GOS}
 cc.gos <- clusterProfiler::simplify(cc.go, cutoff=0.05, by= "p.adjust")
 dotplot(cc.gos, showCategory = 5) + 
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1, size = 10, face = "bold")) + 
   theme(axis.text.y = element_text(size = 13)) + 
   scale_color_viridis(direction = -1, trans="log10") 
-ggsave("./revisedDataset/clusterProfiler/clusterProfiler_Lymph2_GOSimplified_log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
+ggsave("./revisedDataset/clusterProfiler/clusterProfiler_GOSimplified_Lymph_log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
 ```
 
-```{r Lymphocyte 2 - PW}
+```{r Lymphocyte - PW}
 cc.pw <- clusterProfiler::compareCluster(geneClusters = clusterprofilerlist[19:20],
                                          fun = "enrichPathway",
                                          pvalueCutoff=0.05, 
@@ -603,9 +607,9 @@ dotplot(cc.pw, showCategory = 5) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1, size = 10, face = "bold")) + 
   theme(axis.text.y = element_text(size = 13)) + 
   scale_color_viridis(direction = -1, trans="log10") 
-ggsave("./revisedDataset/clusterProfiler/clusterProfiler_enrichPathway_Lymph2-log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
+ggsave("./revisedDataset/clusterProfiler/clusterProfiler_enrichPathway_Lymph-log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
 
-write.csv(cc.pw@compareClusterResult, "./revisedDataset/clusterProfiler/clusterProfiler_enrichPathway_Lymph1_log2FC0.5-completeCase.csv")
+write.csv(cc.pw@compareClusterResult, "./revisedDataset/clusterProfiler/clusterProfiler_enrichPathway_Lymph_log2FC0.5-completeCase.csv")
 ```
 
 
@@ -613,9 +617,9 @@ write.csv(cc.pw@compareClusterResult, "./revisedDataset/clusterProfiler/clusterP
 
 
 
-### Epithelial-like cluster comparison
+### Epithelial 6 cluster comparison
 
-```{r Epithelial-like - GO}
+```{r Epithelial 6 - GO}
 cc.go <- clusterProfiler::compareCluster(geneClusters = clusterprofilerlist[21:22],
                                          fun = "enrichGO", 
                                          OrgDb= org.Hs.eg.db, 
@@ -627,21 +631,21 @@ dotplot(cc.go, showCategory = 5) +
   theme(axis.text.y = element_text(size = 13)) + 
   scale_color_viridis(direction = -1, trans="log10") 
 
-ggsave("./revisedDataset/clusterProfiler/clusterProfiler_clusterCompare_EpiLike_GO_log2FC0.5-completeCase.png", width = 11, height = 30, units = "in")
+ggsave("./revisedDataset/clusterProfiler/clusterProfiler_clusterCompare_Epi6_GO_log2FC0.5-completeCase.png", width = 11, height = 30, units = "in")
 
-write.csv(cc.go@compareClusterResult, "./revisedDataset/clusterProfiler/clusterProfiler_clusterCompare_GO_EpiLike_log2FC0.5-completeCase.csv")
+write.csv(cc.go@compareClusterResult, "./revisedDataset/clusterProfiler/clusterProfiler_clusterCompare_GO_Epi6_log2FC0.5-completeCase.csv")
 ```
 
-```{r Epithelial like - GOS}
+```{r Epithelial 6 - GOS}
 cc.gos <- clusterProfiler::simplify(cc.go, cutoff=0.05, by= "p.adjust")
 dotplot(cc.gos, showCategory = 5) + 
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1, size = 10, face = "bold")) + 
   theme(axis.text.y = element_text(size = 13)) + 
   scale_color_viridis(direction = -1, trans="log10") 
-ggsave("./revisedDataset/clusterProfiler/clusterProfiler_EpiLike_GOSimplified_log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
+ggsave("./revisedDataset/clusterProfiler/clusterProfiler_GOSimplified_Epi6log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
 ```
 
-```{r Lymphocyte 2 - PW}
+```{r Epi 6 - PW}
 cc.pw <- clusterProfiler::compareCluster(geneClusters = clusterprofilerlist[21:22],
                                          fun = "enrichPathway",
                                          pvalueCutoff=0.05, 
@@ -651,9 +655,9 @@ dotplot(cc.pw, showCategory = 5) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1, size = 10, face = "bold")) + 
   theme(axis.text.y = element_text(size = 13)) + 
   scale_color_viridis(direction = -1, trans="log10") 
-ggsave("./revisedDataset/clusterProfiler/clusterProfiler_enrichPathway_EpiLike-log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
+ggsave("./revisedDataset/clusterProfiler/clusterProfiler_enrichPathway_Epi6-log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
 
-write.csv(cc.pw@compareClusterResult, "./revisedDataset/clusterProfiler/clusterProfiler_enrichPathway_EpiLike_log2FC0.5-completeCase.csv")
+write.csv(cc.pw@compareClusterResult, "./revisedDataset/clusterProfiler/clusterProfiler_enrichPathway_Epi6_log2FC0.5-completeCase.csv")
 ```
 
 
@@ -661,9 +665,9 @@ write.csv(cc.pw@compareClusterResult, "./revisedDataset/clusterProfiler/clusterP
 
 
 
-### Epithelial-like cluster comparison
+### Unknown
 
-```{r Erythroid - GO}
+```{r Unknown - GO}
 cc.go <- clusterProfiler::compareCluster(geneClusters = clusterprofilerlist[23:24],
                                          fun = "enrichGO", 
                                          OrgDb= org.Hs.eg.db, 
@@ -675,21 +679,21 @@ dotplot(cc.go, showCategory = 5) +
   theme(axis.text.y = element_text(size = 13)) + 
   scale_color_viridis(direction = -1, trans="log10") 
 
-ggsave("./revisedDataset/clusterProfiler/clusterProfiler_clusterCompare_Ery_GO_log2FC0.5-completeCase.png", width = 11, height = 30, units = "in")
+ggsave("./revisedDataset/clusterProfiler/clusterProfiler_clusterCompare_Unknown_GO_log2FC0.5-completeCase.png", width = 11, height = 30, units = "in")
 
-write.csv(cc.go@compareClusterResult, "./revisedDataset/clusterProfiler/clusterProfiler_clusterCompare_GO_Ery_log2FC0.5-completeCase.csv")
+write.csv(cc.go@compareClusterResult, "./revisedDataset/clusterProfiler/clusterProfiler_clusterCompare_GO_Unknown_log2FC0.5-completeCase.csv")
 ```
 
-```{r Epithelial like - GOS}
+```{r Unknown- GOS}
 cc.gos <- clusterProfiler::simplify(cc.go, cutoff=0.05, by= "p.adjust")
 dotplot(cc.gos, showCategory = 5) + 
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1, size = 10, face = "bold")) + 
   theme(axis.text.y = element_text(size = 13)) + 
   scale_color_viridis(direction = -1, trans="log10") 
-ggsave("./revisedDataset/clusterProfiler/clusterProfiler_Ery_GOSimplified_log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
+ggsave("./revisedDataset/clusterProfiler/clusterProfiler_GOSimplified_Unknown_log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
 ```
 
-```{r Lymphocyte 2 - PW}
+```{r Unknown - PW}
 cc.pw <- clusterProfiler::compareCluster(geneClusters = clusterprofilerlist[23:24],
                                          fun = "enrichPathway",
                                          pvalueCutoff=0.05, 
@@ -699,9 +703,9 @@ dotplot(cc.pw, showCategory = 5) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1, size = 10, face = "bold")) + 
   theme(axis.text.y = element_text(size = 13)) + 
   scale_color_viridis(direction = -1, trans="log10") 
-ggsave("./revisedDataset/clusterProfiler/clusterProfiler_enrichPathway_Ery-log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
+ggsave("./revisedDataset/clusterProfiler/clusterProfiler_enrichPathway_Unk-log2FC0.5-completeCase.png", width = 11, height = 11, units = "in")
 
-write.csv(cc.pw@compareClusterResult, "./revisedDataset/clusterProfiler/clusterProfiler_enrichPathway_Ery_log2FC0.5-completeCase.csv")
+write.csv(cc.pw@compareClusterResult, "./revisedDataset/clusterProfiler/clusterProfiler_enrichPathway_Unk_log2FC0.5-completeCase.csv")
 ```
 
 

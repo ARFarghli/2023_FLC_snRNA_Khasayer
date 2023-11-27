@@ -28,7 +28,7 @@ proj_name <- "FLCvNML"
 ```
 
 ```{r}
-harmonized.seurat <- readRDS('./fullDataset/rds/FLCvNML_harmonized-byID-obj.rds')
+harmonized.seurat <- readRDS('./revisedDataset/rds/FLCvNML_Named-obj.rds')
 ```
 
 ```{r}
