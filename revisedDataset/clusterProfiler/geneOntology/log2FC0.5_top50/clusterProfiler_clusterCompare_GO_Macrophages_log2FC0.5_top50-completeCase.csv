@@ -1,0 +1,92 @@
+"","Cluster","ID","Description","GeneRatio","BgRatio","pvalue","p.adjust","qvalue","geneID","Count"
+"1","Neutrophils and macrophages-FLC","GO:0002181","cytoplasmic translation","9/48","146/18800",1.0386221452694e-10,1.21103342138412e-07,9.39133076617279e-08,"6176/6222/6171/6137/6208/6156/6234/6217/6206",9
+"2","Neutrophils and macrophages-FLC","GO:0051004","regulation of lipoprotein lipase activity","3/48","20/18800",1.72718038156981e-05,0.00671137319158414,0.00520454055391422,"9734/344/341",3
+"3","Neutrophils and macrophages-FLC","GO:0050714","positive regulation of protein secretion","5/48","128/18800",1.83172877959103e-05,0.00671137319158414,0.00520454055391422,"5950/2244/6934/2266/5122",5
+"4","Neutrophils and macrophages-FLC","GO:0042445","hormone metabolic process","6/48","230/18800",2.50890760463557e-05,0.00671137319158414,0.00520454055391422,"5950/1576/6934/2690/1577/5122",6
+"5","Neutrophils and macrophages-FLC","GO:0010817","regulation of hormone levels","8/48","496/18800",3.30941034068774e-05,0.00671137319158414,0.00520454055391422,"5950/1576/2244/6934/2690/2266/1577/5122",8
+"6","Neutrophils and macrophages-FLC","GO:0042178","xenobiotic catabolic process","3/48","25/18800",3.45353680527486e-05,0.00671137319158414,0.00520454055391422,"1576/1577/1555",3
+"7","Neutrophils and macrophages-FLC","GO:0034368","protein-lipid complex remodeling","3/48","30/18800",6.04181236774131e-05,0.00880594152598297,0.00682883792617078,"344/5320/341",3
+"8","Neutrophils and macrophages-FLC","GO:0034369","plasma lipoprotein particle remodeling","3/48","30/18800",6.04181236774131e-05,0.00880594152598297,0.00682883792617078,"344/5320/341",3
+"9","Neutrophils and macrophages-FLC","GO:0034367","protein-containing complex remodeling","3/48","32/18800",7.35470552118174e-05,0.00952842959744212,0.0073891135002282,"344/5320/341",3
+"10","Neutrophils and macrophages-FLC","GO:0090277","positive regulation of peptide hormone secretion","4/48","91/18800",8.49266447571203e-05,0.00979771663531509,0.00759794040781408,"5950/2244/6934/2266",4
+"11","Neutrophils and macrophages-FLC","GO:0002793","positive regulation of peptide secretion","4/48","93/18800",9.24312890124065e-05,0.00979771663531509,0.00759794040781408,"5950/2244/6934/2266",4
+"12","Neutrophils and macrophages-FLC","GO:0071827","plasma lipoprotein particle organization","3/48","45/18800",0.000205564324683948,0.0199740002151236,0.0154894521845185,"344/5320/341",3
+"13","Neutrophils and macrophages-FLC","GO:0071825","protein-lipid complex subunit organization","3/48","48/18800",0.000249216931101742,0.0216851953647528,0.0168164510411869,"344/5320/341",3
+"14","Neutrophils and macrophages-FLC","GO:0046887","positive regulation of hormone secretion","4/48","122/18800",0.000263401052111666,0.0216851953647528,0.0168164510411869,"5950/2244/6934/2266",4
+"15","Neutrophils and macrophages-FLC","GO:0030490","maturation of SSU-rRNA","3/48","51/18800",0.00029845850529617,0.0216851953647528,0.0168164510411869,"6208/6234/6217",3
+"16","Neutrophils and macrophages-FLC","GO:0042572","retinol metabolic process","3/48","51/18800",0.00029845850529617,0.0216851953647528,0.0168164510411869,"5950/1576/1577",3
+"17","Neutrophils and macrophages-FLC","GO:1904036","negative regulation of epithelial cell apoptotic process","3/48","52/18800",0.000316164940995539,0.0216851953647528,0.0168164510411869,"2244/6934/2266",3
+"18","Neutrophils and macrophages-FLC","GO:0050708","regulation of protein secretion","5/48","252/18800",0.000444904869023134,0.0259193165524903,0.0200999304130985,"5950/2244/6934/2266/5122",5
+"19","Neutrophils and macrophages-FLC","GO:0070555","response to interleukin-1","4/48","141/18800",0.000456656737650916,0.0259193165524903,0.0200999304130985,"2244/2690/2266/5122",4
+"20","Neutrophils and macrophages-FLC","GO:0032372","negative regulation of sterol transport","2/48","13/18800",0.000489043708537553,0.0259193165524903,0.0200999304130985,"344/341",2
+"21","Neutrophils and macrophages-FLC","GO:0032375","negative regulation of cholesterol transport","2/48","13/18800",0.000489043708537553,0.0259193165524903,0.0200999304130985,"344/341",2
+"22","Neutrophils and macrophages-FLC","GO:0033700","phospholipid efflux","2/48","13/18800",0.000489043708537553,0.0259193165524903,0.0200999304130985,"344/341",2
+"23","Neutrophils and macrophages-FLC","GO:0031638","zymogen activation","3/48","64/18800",0.000583387576435037,0.0273254566546722,0.0211903649601548,"2244/2266/922",3
+"24","Neutrophils and macrophages-FLC","GO:0009410","response to xenobiotic stimulus","6/48","411/18800",0.000594200674836182,0.0273254566546722,0.0211903649601548,"1576/6546/1577/1555/5122/7037",6
+"25","Neutrophils and macrophages-FLC","GO:1903532","positive regulation of secretion by cell","5/48","274/18800",0.000650496202893522,0.0273254566546722,0.0211903649601548,"5950/2244/6934/2266/5122",5
+"26","Neutrophils and macrophages-FLC","GO:0010763","positive regulation of fibroblast migration","2/48","15/18800",0.00065618592309676,0.0273254566546722,0.0211903649601548,"5063/6546",2
+"27","Neutrophils and macrophages-FLC","GO:0034116","positive regulation of heterotypic cell-cell adhesion","2/48","15/18800",0.00065618592309676,0.0273254566546722,0.0211903649601548,"2244/2266",2
+"28","Neutrophils and macrophages-FLC","GO:0072378","blood coagulation, fibrin clot formation","2/48","15/18800",0.00065618592309676,0.0273254566546722,0.0211903649601548,"2244/2266",2
+"29","Neutrophils and macrophages-FLC","GO:0120254","olefinic compound metabolic process","4/48","157/18800",0.000684337343527695,0.0275150807776997,0.0213374148127147,"5950/1576/1577/1555",4
+"30","Neutrophils and macrophages-FLC","GO:0009404","toxin metabolic process","2/48","17/18800",0.000847152361255188,0.0294695313345827,0.0228530535491619,"1576/1577",2
+"31","Neutrophils and macrophages-FLC","GO:0060192","negative regulation of lipase activity","2/48","17/18800",0.000847152361255188,0.0294695313345827,0.0228530535491619,"9734/341",2
+"32","Neutrophils and macrophages-FLC","GO:0072376","protein activation cascade","2/48","17/18800",0.000847152361255188,0.0294695313345827,0.0228530535491619,"2244/2266",2
+"33","Neutrophils and macrophages-FLC","GO:0051222","positive regulation of protein transport","5/48","293/18800",0.000879387620807069,0.0294695313345827,0.0228530535491619,"5950/2244/6934/2266/5122",5
+"34","Neutrophils and macrophages-FLC","GO:0071466","cellular response to xenobiotic stimulus","4/48","168/18800",0.000881271167986839,0.0294695313345827,0.0228530535491619,"1576/1577/1555/7037",4
+"35","Neutrophils and macrophages-FLC","GO:0042274","ribosomal small subunit biogenesis","3/48","74/18800",0.000891595829619506,0.0294695313345827,0.0228530535491619,"6208/6234/6217",3
+"36","Neutrophils and macrophages-FLC","GO:1903829","positive regulation of protein localization","6/48","446/18800",0.000909865461445093,0.0294695313345827,0.0228530535491619,"5950/2244/6934/2266/5122/7037",6
+"37","Neutrophils and macrophages-FLC","GO:0051047","positive regulation of secretion","5/48","300/18800",0.000977280627054491,0.0299269896453434,0.0232078036520267,"5950/2244/6934/2266/5122",5
+"38","Neutrophils and macrophages-FLC","GO:0000028","ribosomal small subunit assembly","2/48","19/18800",0.00106170583791694,0.0299269896453434,0.0232078036520267,"6208/6234",2
+"39","Neutrophils and macrophages-FLC","GO:0010985","negative regulation of lipoprotein particle clearance","2/48","19/18800",0.00106170583791694,0.0299269896453434,0.0232078036520267,"344/341",2
+"40","Neutrophils and macrophages-FLC","GO:0070989","oxidative demethylation","2/48","19/18800",0.00106170583791694,0.0299269896453434,0.0232078036520267,"1576/1577",2
+"41","Neutrophils and macrophages-FLC","GO:0090276","regulation of peptide hormone secretion","4/48","177/18800",0.00106975608709566,0.0299269896453434,0.0232078036520267,"5950/2244/6934/2266",4
+"42","Neutrophils and macrophages-FLC","GO:0010770","positive regulation of cell morphogenesis involved in differentiation","3/48","79/18800",0.00107798762015817,0.0299269896453434,0.0232078036520267,"2244/5063/2266",3
+"43","Neutrophils and macrophages-FLC","GO:1904951","positive regulation of establishment of protein localization","5/48","309/18800",0.00111481475178443,0.0301682474095616,0.0233948943981343,"5950/2244/6934/2266/5122",5
+"44","Neutrophils and macrophages-FLC","GO:0002791","regulation of peptide secretion","4/48","180/18800",0.00113842443054949,0.0301682474095616,0.0233948943981343,"5950/2244/6934/2266",4
+"45","Neutrophils and macrophages-FLC","GO:0042310","vasoconstriction","3/48","82/18800",0.00120077939831256,0.0306742430826268,0.0237872842899489,"2244/2266/6546",3
+"46","Neutrophils and macrophages-FLC","GO:0090087","regulation of peptide transport","4/48","183/18800",0.00121013308902301,0.0306742430826268,0.0237872842899489,"5950/2244/6934/2266",4
+"47","Neutrophils and macrophages-FLC","GO:0001523","retinoid metabolic process","3/48","84/18800",0.00128734396514456,0.0312717304866366,0.0242506242556837,"5950/1576/1577",3
+"48","Neutrophils and macrophages-FLC","GO:0097006","regulation of plasma lipoprotein particle levels","3/48","84/18800",0.00128734396514456,0.0312717304866366,0.0242506242556837,"344/5320/341",3
+"49","Neutrophils and macrophages-FLC","GO:0016101","diterpenoid metabolic process","3/48","87/18800",0.00142440663464402,0.0338950639998965,0.0262849688326362,"5950/1576/1577",3
+"50","Neutrophils and macrophages-FLC","GO:0060191","regulation of lipase activity","3/48","90/18800",0.0015703162301299,0.0366197744866294,0.0283979292985598,"9734/344/341",3
+"51","Neutrophils and macrophages-FLC","GO:0060284","regulation of cell development","6/48","500/18800",0.00163448850501951,0.0373688940559362,0.028978857085898,"1826/9734/2244/5063/2266/5047",6
+"52","Neutrophils and macrophages-FLC","GO:0042730","fibrinolysis","2/48","24/18800",0.00169974172042148,0.0376920335031489,0.0292294454989662,"2244/2266",2
+"53","Neutrophils and macrophages-FLC","GO:1904035","regulation of epithelial cell apoptotic process","3/48","94/18800",0.00177897933826782,0.0376920335031489,0.0292294454989662,"2244/6934/2266",3
+"54","Neutrophils and macrophages-FLC","GO:0031639","plasminogen activation","2/48","25/18800",0.00184454227280137,0.0376920335031489,0.0292294454989662,"2244/2266",2
+"55","Neutrophils and macrophages-FLC","GO:0034114","regulation of heterotypic cell-cell adhesion","2/48","25/18800",0.00184454227280137,0.0376920335031489,0.0292294454989662,"2244/2266",2
+"56","Neutrophils and macrophages-FLC","GO:0010769","regulation of cell morphogenesis involved in differentiation","3/48","96/18800",0.00188949405768769,0.0376920335031489,0.0292294454989662,"2244/5063/2266",3
+"57","Neutrophils and macrophages-FLC","GO:0009306","protein secretion","5/48","350/18800",0.00193013331287155,0.0376920335031489,0.0292294454989662,"5950/2244/6934/2266/5122",5
+"58","Neutrophils and macrophages-FLC","GO:0043279","response to alkaloid","3/48","97/18800",0.00194632244667156,0.0376920335031489,0.0292294454989662,"2690/6546/5122",3
+"59","Neutrophils and macrophages-FLC","GO:2001237","negative regulation of extrinsic apoptotic signaling pathway","3/48","97/18800",0.00194632244667156,0.0376920335031489,0.0292294454989662,"2244/6934/2266",3
+"60","Neutrophils and macrophages-FLC","GO:0035592","establishment of protein localization to extracellular region","5/48","351/18800",0.00195431098383664,0.0376920335031489,0.0292294454989662,"5950/2244/6934/2266/5122",5
+"61","Neutrophils and macrophages-FLC","GO:0015012","heparan sulfate proteoglycan biosynthetic process","2/48","26/18800",0.00199500662841183,0.0376920335031489,0.0292294454989662,"6934/55790",2
+"62","Neutrophils and macrophages-FLC","GO:0006721","terpenoid metabolic process","3/48","98/18800",0.00200420761337498,0.0376920335031489,0.0292294454989662,"5950/1576/1577",3
+"63","Neutrophils and macrophages-FLC","GO:0071692","protein localization to extracellular region","5/48","359/18800",0.00215581658517719,0.0398997164812159,0.0309414610971964,"5950/2244/6934/2266/5122",5
+"64","Neutrophils and macrophages-FLC","GO:0014072","response to isoquinoline alkaloid","2/48","28/18800",0.00231281228128122,0.0414882941534446,0.032173372463491,"2690/5122",2
+"65","Neutrophils and macrophages-FLC","GO:0043278","response to morphine","2/48","28/18800",0.00231281228128122,0.0414882941534446,0.032173372463491,"2690/5122",2
+"66","Neutrophils and macrophages-FLC","GO:0030072","peptide hormone secretion","4/48","220/18800",0.00237273882665016,0.0419183859374861,0.0325069003523523,"5950/2244/6934/2266",4
+"67","Neutrophils and macrophages-FLC","GO:0034308","primary alcohol metabolic process","3/48","105/18800",0.00243957115267129,0.0424558203584287,0.0329236703871899,"5950/1576/1577",3
+"68","Neutrophils and macrophages-FLC","GO:0032369","negative regulation of lipid transport","2/48","29/18800",0.00248009660432425,0.0425263623623835,0.0329783743516181,"344/341",2
+"69","Neutrophils and macrophages-FLC","GO:0002790","peptide secretion","4/48","225/18800",0.00257347211927878,0.0434879491460733,0.0337240663685808,"5950/2244/6934/2266",4
+"70","Neutrophils and macrophages-FLC","GO:0006805","xenobiotic metabolic process","3/48","108/18800",0.00264268342250704,0.044019555294903,0.0341363166907301,"1576/1577/1555",3
+"71","Neutrophils and macrophages-FLC","GO:0046883","regulation of hormone secretion","4/48","231/18800",0.00282943321857539,0.0452230158498115,0.0350695771553562,"5950/2244/6934/2266",4
+"72","Neutrophils and macrophages-FLC","GO:0090162","establishment of epithelial cell polarity","2/48","31/18800",0.00283128658407911,0.0452230158498115,0.0350695771553562,"4649/23150",2
+"73","Neutrophils and macrophages-FLC","GO:1902042","negative regulation of extrinsic apoptotic signaling pathway via death domain receptors","2/48","31/18800",0.00283128658407911,0.0452230158498115,0.0350695771553562,"2244/2266",2
+"74","Neutrophils and macrophages-FLC","GO:0030201","heparan sulfate proteoglycan metabolic process","2/48","32/18800",0.00301513588600359,0.0475087627443269,0.0368421298161748,"6934/55790",2
+"75","Neutrophils and macrophages-FLC","GO:0045907","positive regulation of vasoconstriction","2/48","33/18800",0.00320445066369686,0.0489317369500866,0.0379456188860922,"2244/2266",2
+"76","Neutrophils and macrophages-FLC","GO:0006720","isoprenoid metabolic process","3/48","117/18800",0.00331368606340975,0.0489317369500866,0.0379456188860922,"5950/1576/1577",3
+"77","Neutrophils and macrophages-FLC","GO:0016485","protein processing","4/48","243/18800",0.00339281035568693,0.0489317369500866,0.0379456188860922,"2244/2266/5122/922",4
+"78","Neutrophils and macrophages-FLC","GO:1904019","epithelial cell apoptotic process","3/48","118/18800",0.00339408174104628,0.0489317369500866,0.0379456188860922,"2244/6934/2266",3
+"79","Neutrophils and macrophages-FLC","GO:0010984","regulation of lipoprotein particle clearance","2/48","34/18800",0.00339920299567497,0.0489317369500866,0.0379456188860922,"344/341",2
+"80","Neutrophils and macrophages-FLC","GO:0042573","retinoic acid metabolic process","2/48","34/18800",0.00339920299567497,0.0489317369500866,0.0379456188860922,"1576/1577",2
+"81","Neutrophils and macrophages-FLC","GO:2000352","negative regulation of endothelial cell apoptotic process","2/48","34/18800",0.00339920299567497,0.0489317369500866,0.0379456188860922,"2244/2266",2
+"82","Neutrophils and macrophages-NML","GO:0002181","cytoplasmic translation","8/45","146/18800",1.84433806141552e-09,3.01180405429155e-06,2.25591666038404e-06,"6170/6187/6168/6167/6154/6134/6136/23521",8
+"83","Neutrophils and macrophages-NML","GO:0043407","negative regulation of MAP kinase activity","4/45","60/18800",1.26631459048049e-05,0.0103394586312732,0.00774451344283329,"348/5468/5795/4067",4
+"84","Neutrophils and macrophages-NML","GO:0071901","negative regulation of protein serine/threonine kinase activity","4/45","122/18800",0.000204740425943869,0.0496317852282364,0.0371754500500923,"348/5468/5795/4067",4
+"85","Neutrophils and macrophages-NML","GO:0060368","regulation of Fc receptor mediated stimulatory signaling pathway","2/45","10/18800",0.000249049418015028,0.0496317852282364,0.0371754500500923,"5795/4067",2
+"86","Neutrophils and macrophages-NML","GO:0007159","leukocyte cell-cell adhesion","6/45","381/18800",0.000278188014026447,0.0496317852282364,0.0371754500500923,"2131/6793/10859/567/81704/4067",6
+"87","Neutrophils and macrophages-NML","GO:0006898","receptor-mediated endocytosis","5/45","246/18800",0.000293570758337627,0.0496317852282364,0.0371754500500923,"8685/348/53353/10859/567",5
+"88","Neutrophils and macrophages-NML","GO:0002765","immune response-inhibiting signal transduction","2/45","11/18800",0.00030393009937683,0.0496317852282364,0.0371754500500923,"10859/4067",2
+"89","Neutrophils and macrophages-NML","GO:0030210","heparin biosynthetic process","2/45","11/18800",0.00030393009937683,0.0496317852282364,0.0371754500500923,"2131/9348",2
+"90","Neutrophils and macrophages-NML","GO:0097048","dendritic cell apoptotic process","2/45","11/18800",0.00030393009937683,0.0496317852282364,0.0371754500500923,"10859/4067",2
+"91","Neutrophils and macrophages-NML","GO:2000668","regulation of dendritic cell apoptotic process","2/45","11/18800",0.00030393009937683,0.0496317852282364,0.0371754500500923,"10859/4067",2
