@@ -1,0 +1,6 @@
+"","Cluster","ID","Description","GeneRatio","BgRatio","pvalue","p.adjust","qvalue","geneID","Count"
+"1","Liver epithelial cells 6-FLC","R-HSA-196854","Metabolism of vitamins and cofactors","8/67","190/10891",2.00308026937375e-05,0.00644991846738349,0.00619900630732509,"10082/10243/5095/10135/348/1528/25902/79668",8
+"2","Liver epithelial cells 6-FLC","R-HSA-196849","Metabolism of water-soluble vitamins and cofactors","6/67","124/10891",0.000109171953510976,0.0175766845152671,0.0168929233327509,"10243/5095/10135/1528/25902/79668",6
+"3","Liver epithelial cells 6-NML","R-HSA-977606","Regulation of Complement cascade","5/67","47/10891",9.5115182423126e-06,0.0031673355746901,0.00302366158860885,"1369/735/731/722/27202",5
+"4","Liver epithelial cells 6-NML","R-HSA-166658","Complement cascade","5/67","58/10891",2.69678523424427e-05,0.00449014741501671,0.00428646916179879,"1369/735/731/722/27202",5
+"5","Liver epithelial cells 6-NML","R-HSA-2022870","Chondroitin sulfate biosynthesis","3/67","20/10891",0.00023539201396864,0.026128513550519,0.0249432941117647,"55790/1462/337876",3
