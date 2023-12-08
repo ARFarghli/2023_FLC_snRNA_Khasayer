@@ -1,0 +1,5 @@
+"","Cluster","ID","Description","GeneRatio","BgRatio","pvalue","p.adjust","qvalue","geneID","Count"
+"1","Cholangiocyte cells-NML","R-HSA-1474244","Extracellular matrix organization","12/115","300/10891",7.49194452620245e-05,0.0229045158269499,0.0204959895220085,"3696/4684/3691/2266/824/3914/9507/3371/2247/1306/3694/3911",12
+"2","Cholangiocyte cells-NML","R-HSA-190377","FGFR2b ligand binding and activation","3/115","10/10891",0.000130396421187035,0.0229045158269499,0.0204959895220085,"2263/2247/2252",3
+"3","Cholangiocyte cells-NML","R-HSA-6785807","Interleukin-4 and Interleukin-13 signaling","7/115","108/10891",0.000141095580042812,0.0229045158269499,0.0204959895220085,"301/596/4128/7431/2247/3091/3911",7
+"4","Cholangiocyte cells-NML","R-HSA-3000171","Non-integrin membrane-ECM interactions","5/115","59/10891",0.000382299388320167,0.0465449505279803,0.0416505123064603,"3691/3914/3371/2247/3911",5
