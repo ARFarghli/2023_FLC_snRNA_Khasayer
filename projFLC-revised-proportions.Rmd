@@ -102,7 +102,7 @@ sample_cluster_df <- as.data.frame(sample_cluster_percent) %>%
 ```
 
 ```{r}
-ggplot(sample_cluster_df, aes(x = Cluster, y = Freq, fill = id)) +
+ggplot(sample_cluster_df, aes(x = Cluster, y = Freq, fill = ID)) +
   geom_bar(stat = "identity") +
   labs(title = "Percentage of Cells from Each Sample in Each Cluster",
        x = "Cluster",
@@ -142,20 +142,9 @@ p1 <- ggplot(count_per_cluster, aes(x = Cluster, y = Count, fill = `Patient.Stat
                              "#56B4E9", #6
                              "#E69F00",#7
                              "#F0E442", #8
-                             "#009E73",  #9
-                             "#0072B2", #10
-                             "#D55E00", #11
-                             "#DDCC77", #12
-                             "#CC6677", #13
-                             "#AA4499", #14
-                             "#882255",  #15
-                             "#44AA99", #16
-                             "#8A9FD1",#17
-                             "#C06CAB", #18
-                             "#89C75F", #19
-                             "#9983BD", #20
-                             "#F37B7D", #21
-                             "#3BBCA8")) #22
+                             "#9983BD", #9
+                             "#3BBCA8", #10
+                             "#8A9FD1")) #11
 
 p1 + ggsave(filename = "./revisedDataset/proportions/Proportions-count-per-cluster-NAMED-manualColors.png", width = 10, height = 10) 
 ```
@@ -209,21 +198,10 @@ p3 <- percent_per_cluster %>%
                              "#56B4E9", #6
                              "#E69F00",#7
                              "#F0E442", #8
-                             "#009E73",  #9
-                             "#0072B2", #10
-                             "#D55E00", #11
-                             "#DDCC77", #12
-                             "#CC6677", #13
-                             "#AA4499", #14
-                             "#882255",  #15
-                             "#44AA99", #16
-                             "#8A9FD1",#17
-                             "#C06CAB", #18
-                             "#89C75F", #19
-                             "#9983BD", #20
-                             "#F37B7D", #21
-                             "#3BBCA8" #22
-                             )) 
+                             "#9983BD", #9
+                             "#3BBCA8", #10
+                             "#8A9FD1")) #11
+                             
 p3 + ggsave(filename = "./revisedDataset/proportions/Proportions-PatientStatus-percent-by-Cluster-NAMED-manualColors.png", width = 10, height = 10)
 ```
 
@@ -235,14 +213,14 @@ treemap_counts <- table(harmonized.seurat$status, harmonized.seurat$cluster_name
 treemap_flc <- treemap_counts %>% 
   dplyr::filter(Status == "FLC") %>% 
   dplyr::mutate(Proportion = Freq/sum(Freq)*100) %>% 
-  dplyr::slice(c(-5,-11)) %>% 
-  mutate(Subgroup = c("Liver epithelial cells", "Liver epithelial cells", "Endothelial cells", "Liver epithelial cells", "Stellate cells", "Liver epithelial cells", "Cholangiocyte cells", "Neutrophils and macrophages", "Lymphocytes", "Unk"))
+  dplyr::slice(c(-11, -12)) %>% 
+  mutate(Subgroup = c("Liver epithelial cells", "Liver epithelial cells", "Endothelial cells", "Liver epithelial cells", "Liver epithelial cells", "Stellate cells", "Liver epithelial cells", "Cholangiocyte cells", "Neutrophils and macrophages", "Lymphocytes"))
 
 treemap_nml <- treemap_counts %>% 
   dplyr::filter(Status == "NML") %>% 
   dplyr::mutate(Proportion = Freq/sum(Freq)*100) %>% 
-  dplyr::slice(c(-5,-11)) %>% 
-  mutate(Subgroup = c("Liver epithelial cells", "Liver epithelial cells", "Endothelial cells", "Liver epithelial cells", "Stellate cells", "Liver epithelial cells", "Cholangiocyte cells", "Neutrophils and macrophages", "Lymphocytes", "Unk"))
+  dplyr::slice(c(-11,-12)) %>% 
+  mutate(Subgroup = c("Liver epithelial cells", "Liver epithelial cells", "Endothelial cells", "Liver epithelial cells", "Liver epithelial cells", "Stellate cells", "Liver epithelial cells", "Cholangiocyte cells", "Neutrophils and macrophages", "Lymphocytes"))
 ```
 
 ```{r}
@@ -272,7 +250,7 @@ treemap_flc_plot <- ggplot(treemap_flc, aes(area = Freq, fill = Cluster,
                                "#b15928"
                                ))
 
-treemap_flc_plot + ggsave("revisedDataset/proportions/flc_treemap-removedClusters4_11.png", width = 9, height = 5, units = "in", dpi = 600)
+treemap_flc_plot + ggsave("revisedDataset/proportions/flc_treemap-removedClusters_Epi6_Unk.png", width = 5, height = 3, units = "in", dpi = 600)
 ```
 
 
@@ -301,6 +279,6 @@ treemap_nml_plot <- ggplot(treemap_nml, aes(area = Freq, fill = Cluster,
                                "#b15928"
                                ))
 
-treemap_nml_plot + ggsave("revisedDataset/proportions/nml_treemap-removedClusters4_11.png", width = 9, height = 5, units = "in", dpi = 600)
+treemap_nml_plot + ggsave("revisedDataset/proportions/nml_treemap-removedClusters_Unk_Epi6.png", width = 5, height = 3, units = "in", dpi = 600)
 ```
 

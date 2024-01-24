@@ -12,6 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r load-libraries}
 library(Seurat)
 library(tidyverse)
+library(future)
 ```
 
 # Single cell RNAseq analysis
@@ -41,6 +42,10 @@ For the differential expression, we can use FindMarkers or FindConservedMarkers.
 
 ```{r}
 harmonized.seurat <- PrepSCTFindMarkers(harmonized.seurat)
+```
+```{r}
+plan("multicore", workers = 70)
+plan()
 ```
 
 
@@ -82,7 +87,7 @@ for (c in levels(Idents(harmonized.seurat))) {
 
 head(deg)
 
-write_csv(deg, file = paste0("./revisedDataset/", proj_name, '_DEG_clusterNamed_FLCvsNML-MAST.csv'))
+write_csv(deg, file = paste0("./revisedDataset/", proj_name, '_DEG_clusterNamedAlternative_FLCvsNML-MAST.csv'))
 ```
 
 

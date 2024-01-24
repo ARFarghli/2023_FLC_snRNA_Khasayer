@@ -19,7 +19,10 @@ library(BiocParallel)
 library(ArchR)
 library(clusterProfiler)
 library(org.Hs.eg.db)
+library(dittoSeq)
+library(ComplexHeatmap)
 # BiocManager::install("glmGamPoi")
+# BiocManager::install("dittoSeq")
 ```
 
 ```{r set project}
@@ -73,7 +76,7 @@ DimPlot(harmonized.seurat, reduction = "umap", label = FALSE, pt.size = 0.2,  co
 ggsave(paste0("./revisedDataset/UMAPs/metadata/harmony/", proj_name, "_umap_clusterNamed-split-nonraster.png"), units = 'in', width = 10, height = 6, dpi = 600)
 ```
 
-## Cell type overlay
+### Cell type overlay
 
 ```{r}
 dir.create("./revisedDataset/UMAPs/celTypeMarkers/noLabel")
@@ -97,26 +100,7 @@ for (gene in c("EPCAM", "PKHD1", "FGFR2", "TYROBP", "SRGN", "C1QB", "FYN", "NOST
 
 #### Heatmap using complexheatmap
 
-I want to make figures using my seurat object that are similar in quality and format to the ones made in ArchR for the sake of consistency. I found a user uploaded package that would allow me to do this. It is installed below.
-
 ```{r}
-devtools::install_github("RyanYip-Kat/yipCat")
-```
-
-```{r}
-DoLikeArchRHeatmap(
-  seurat = harmonized.seurat,
-  groupBy = "cluster_named",
-  N = 30,
-  slot = "scale.data",
-  scale = TRUE,
-  limits = NULL
-)
-```
-
-
-```{r}
-counts <- GetAssayData(harmonized.seurat, assay="SCT", slot="data")
 features = c("VCAN", "SLC16A14", "LINC00473", "PDE10A","FAM19A5", "TMEM163", "OAT", "CA12", "BACE2", "COL4A1",
     "FAM167A", "GPRIN3", "IRF4", "KIF26B", "TESC",
     "CD68", # Ross, H. M.et al.Fibrolamellar carcinomas are positive for CD68.Mod. Pathol.24,390–395 (2011)
@@ -126,17 +110,7 @@ features = c("VCAN", "SLC16A14", "LINC00473", "PDE10A","FAM19A5", "TMEM163", "OA
     "KRT7", # Malouf G, Falissard B, Azoulay D, et al. Is histological diagnosis ofprimary liver carcinomas withfibrous stroma reproducibleamong experts? J Clin Pathol 2009;62(06):519–5248Abdul-Al HM, Wang G, Makhlouf HR, Goodman ZD. Fibrolamellarhepatocellular carcinoma: an immunohistochemical comparisonwith conventional hepatocellular carcinoma. Int J Surg Pathol2010;18(05):313–318
     "TCN1", # D. L. Lildballe, K. Q. T. Nguyen, S. S. Poulsen, H. O. Nielsen,and E. Nexo, “Haptocorrin as marker of disease progressionin �brolamellar hepatocellular carcinoma,”European Journal ofSurgical Oncology
     "PRKACA", "DNAJB1")
-counts <- as.matrix(counts[rownames(counts) %in% features, ])
-
-metadata <- harmonized.seurat[[]]
-metadata <- metadata[rownames(metadata) %in% colnames(features), ]
 ```
-
-
-
-
-
-
 
 ```{r}
 DefaultAssay(harmonized.seurat) <- "SCT"
@@ -154,7 +128,104 @@ for (gene in c("CD68")) {
 }
 ```
 
-## Figure 2
+### Heatmap
+### Using dittoSeq to make the heatmap (doesn't work)
+
+```{r}
+features = c("VCAN", "SLC16A14", "LINC00473", "PDE10A","FAM19A5", "TMEM163", "OAT", "CA12", "BACE2", "COL4A1",
+    "FAM167A", "GPRIN3", "IRF4", "KIF26B", "TESC",
+    "CD68", # Ross, H. M.et al.Fibrolamellar carcinomas are positive for CD68.Mod. Pathol.24,390–395 (2011)
+    "SOX9", "SOX17", "PDX1", "POU5F1", "SALL4", "SHH", "NANOG", "KLF4", "SOX2", "BMI1", # Oikawa 2015
+    "AGR2", #Wang, Z., Hao, Y. & Lowe, A. W. The adenocarcinoma-associated antigen,AGR2, promotes tumor growth, cell migration, and cellular transformation.Cancer Res.68,492–497  
+    "PCSK1", #Malouf, G. G.et al.Transcriptional profiling of pure fibrolamellarhepatocellular carcinoma reveals an endocrine signature.Hepatology59,2228–2237
+    "KRT7", # Malouf G, Falissard B, Azoulay D, et al. Is histological diagnosis ofprimary liver carcinomas withfibrous stroma reproducibleamong experts? J Clin Pathol 2009;62(06):519–5248Abdul-Al HM, Wang G, Makhlouf HR, Goodman ZD. Fibrolamellarhepatocellular carcinoma: an immunohistochemical comparisonwith conventional hepatocellular carcinoma. Int J Surg Pathol2010;18(05):313–318
+    "TCN1", # D. L. Lildballe, K. Q. T. Nguyen, S. S. Poulsen, H. O. Nielsen,and E. Nexo, “Haptocorrin as marker of disease progressionin �brolamellar hepatocellular carcinoma,”European Journal ofSurgical Oncology
+    "PRKACA", "DNAJB1")
+```
+
+```{r}
+getMetas(harmonized.seurat)
+dittoDimPlot(harmonized.seurat, "cluster_named")
+
+hm <- dittoHeatmap(harmonized.seurat, features = features,
+    annot.by = c("cluster_named", "status"))
+```
+
+```{r}
+harmonized.seurat <- ScaleData(harmonized.seurat, features = rownames(harmonized.seurat))
+```
+
+```{r}
+hm <- DoHeatmap(harmonized.seurat, features = features, group.by = "cluster_named")
+hm
+```
+
+
+### Heatmap using Seurat Native features
+
+```{r}
+DoHeatmap(harmonized.seurat, features = features, group.by = "cluster_named", assay = "SCT", slot = "scale.data")
+```
+
+### Heatmap using avg expression
+
+```{r}
+avg_expression <- AverageExpression(harmonized.seurat, return.seurat = TRUE, group.by = c("ident", "status"))
+```
+
+```{r}
+new_order <- c("Liver epithelial cells 1_FLC", "Liver epithelial cells 1_NML", 
+               "Liver epithelial cells 2_FLC", "Liver epithelial cells 2_NML", 
+               "Liver epithelial cells 3_FLC", "Liver epithelial cells 3_NML", 
+               "Liver epithelial cells 4_FLC", "Liver epithelial cells 4_NML", 
+               "Liver epithelial cells 5_FLC", "Liver epithelial cells 5_NML", 
+               "Liver epithelial cells 6_FLC", "Liver epithelial cells 6_NML", 
+               "Endothelial cells_FLC", "Endothelial cells_NML",
+               "Stellate cells_FLC", "Stellate cells_NML",
+               "Neutrophils and macrophages_FLC", "Neutrophils and macrophages_NML",
+               "Lymphocytes_FLC", "Lymphocytes_NML",
+               "Cholangiocyte cells_FLC", "Cholangiocyte cells_NML",
+               "Unknown_FLC", "Unknown_NML")
+
+avg_expression <- SetIdent(avg_expression, value = new_order)
+```
+
+```{r}
+p1 <- DoHeatmap(avg_expression, features = features, draw.lines = FALSE, group.by = "ident", size = 4)
+p1
+```
+
+```{r}
+dir.create("./revisedDataset/manuscript")
+dir.create("./revisedDataset/manusc ript/figure2")
+ggsave("./revisedDataset/manuscript/figure2/FLCmarkerheatmap.png", dpi = 300, width = 12, height = 10)
+```
+
+#### Dittoseq using avg expression seurat
+
+```{r}
+avg_expression <- AverageExpression(harmonized.seurat, return.seurat = TRUE)
+```
+
+
+```{r}
+hm <- dittoHeatmap(avg_expression, features = features,
+    annot.by = c("cluster_named", "status"))
+```
+
+### Heatmap using complexheatmap
+
+```{r}
+markers <- read_csv("./revisedDataset/cell_type_assignment/FLCvNML_HighlyEnrichedMarkers_CLUSTERNAMED_logFC.25_wilcox.csv")
+marker_genes <- markers$gene
+```
+
+```{r}
+expression_matrix <- GetAssayData(harmonized.seurat, slot = "counts")[marker_genes, ]
+```
+
+
+
 
 ## Figure 4
 

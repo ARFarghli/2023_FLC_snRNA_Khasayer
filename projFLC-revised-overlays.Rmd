@@ -88,3 +88,40 @@ for (gene in c("ERBB2")) {
   ggsave(paste0("./revisedDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-named.png"), units = "in", width = 18, height = 10, dpi = 300)
 }
 ```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("KLF15")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4, label = TRUE,
+              repel = TRUE)
+  ggsave(paste0("./revisedDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-named.png"), units = "in", width = 18, height = 10, dpi = 300)
+}
+```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("KLF15")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4, label = TRUE,
+              repel = TRUE, order = TRUE)
+  ggsave(paste0("./revisedDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-named.png"), units = "in", width = 18, height = 10, dpi = 300)
+}
+```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("POSTN", "CALCR")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4, label = TRUE,
+              repel = TRUE, order = TRUE)
+  ggsave(paste0("./revisedDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-named.png"), units = "in", width = 18, height = 10, dpi = 300)
+}
+```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("FGF7", "CALCR", "CALCA", "CALCRL", "CTGF")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4, label = TRUE,
+              repel = TRUE, order = TRUE)
+  ggsave(paste0("./revisedDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-named.png"), units = "in", width = 18, height = 10, dpi = 300)
+}
+```
+

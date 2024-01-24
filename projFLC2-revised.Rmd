@@ -215,7 +215,7 @@ Based on the results of the overlap analysis and the module expression scores, w
 
 
 ```{r cell-type-assignment}
-cluster_ass <- read_csv(paste0("./revisedDataset/cell_type_assignment/", proj_name, '_cluster_assignment.csv')) %>%
+cluster_ass <- read_csv(paste0("./revisedDataset/cell_type_assignment/", proj_name, '_alternative_cluster_assignment.csv')) %>%
   mutate(cluster_assignment = paste(cluster, assignment, sep = "_"))
 
 harmonized.seurat[["cluster_id_named"]] <- plyr::mapvalues(Idents(harmonized.seurat),
@@ -226,7 +226,7 @@ new.cluster.ids <- cluster_ass$assignment
 names(new.cluster.ids) <- levels(harmonized.seurat)
 harmonized.seurat <- RenameIdents(harmonized.seurat, new.cluster.ids)
 
-harmonized.seurat[["cluster_named"]] <- Idents(harmonized.seurat)
+harmonized.seurat[["alternative_cluster_named"]] <- Idents(harmonized.seurat)
 ```
 
 ```{r Change color scheme}
@@ -251,7 +251,7 @@ ggsave(paste0("./revisedDataset/UMAPs/metadata/harmony/", proj_name, "_umap_clus
 
 
 # Save a cluster named and a cluster named without immune
-saveRDS(harmonized.seurat, paste0("./revisedDataset/rds/", proj_name, '_Named-obj.rds'))
+saveRDS(harmonized.seurat, paste0("./revisedDataset/rds/", proj_name, '_alternative_Named-obj.rds'))
 ```
 
 ### Find markers of named clusters
