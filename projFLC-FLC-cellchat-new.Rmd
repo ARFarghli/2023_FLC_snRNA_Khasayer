@@ -1,0 +1,850 @@
+---
+title: "New FLC subset for cellchat"
+output: html_document
+date: "2024-01-20"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load-libraries}
+library(Seurat)
+library(tidyverse)
+library(CellChat)
+library(patchwork)
+library(svglite)
+library(ggalluvial)
+library(NMF)
+library(reticulate)
+options(stringsAsFactors = FALSE)
+```
+
+```{r set seed and project name, warning=F, message=F}
+set.seed(1234)
+proj_name <- "FLCvNML"
+```
+
+```{r}
+harmonized.seurat <- readRDS('./revisedDataset/rds/FLCvNML_Named-obj.rds')
+```
+
+```{r Extract RNA count table}
+# Check available assays
+assay_names <- Assays(harmonized.seurat)
+print(assay_names)
+
+# Extract data matrix
+data_matrix <- GetAssayData(harmonized.seurat,  assay = "RNA") # normalized data matrix
+```
+
+```{r}
+labels <- Idents(harmonized.seurat)
+meta <-  harmonized.seurat@meta.data # a dataframe with rownames containing cell mata data
+cell.use <-  rownames(meta)[meta$orig.ident == "FLC"]
+```
+
+```{r }
+data.input <- data_matrix[, cell.use]
+meta <-  meta[cell.use, ]
+```
+
+## Alternative way to get counts
+
+```{r}
+Idents(harmonized.seurat) <- harmonized.seurat$cluster_named
+data.input <- NormalizeData(harmonized.seurat, normalization.method = "LogNormalize", scale.factor = 10000, assay = "RNA")
+data.input <- subset(harmonized.seurat, subset = status == "FLC")
+cellchat <- createCellChat(object = data.input, group.by = "cluster_named")
+```
+
+
+```{r}
+#> [1] "Create a CellChat object from a data matrix"
+#> Set cell identities for the new CellChat object 
+```
+
+```{r}
+levels(cellchat@idents) # show factor levels of the cell labels
+groupSize <- as.numeric(table(cellchat@idents)) # number of cells in each cell group
+```
+
+
+```{r Set the ligand-receptor interaction database}
+CellChatDB <- CellChatDB.human # use CellChatDB.mouse if running on mouse data
+showDatabaseCategory(CellChatDB)
+```
+
+```{r}
+dplyr::glimpse(CellChatDB$interaction)
+CellChatDB.use <- subsetDB(CellChatDB, search = "Secreted Signaling") # use Secreted Signaling
+cellchat@DB <- CellChatDB.use
+```
+
+```{r Preprocessing the expression data for cell-cell communication analysis}
+# subset the expression data of signaling genes for saving computation cost
+cellchat <- subsetData(cellchat) # This step is necessary even if using the whole database
+future::plan("multisession", workers = 70) # do parallel
+cellchat <- identifyOverExpressedGenes(cellchat)
+cellchat <- identifyOverExpressedInteractions(cellchat)
+cellchat <- projectData(cellchat, PPI.human)
+saveRDS(cellchat, "./fullDataset/rds/scRNA_FLCnew-1-alternate.rds")
+cellchat <- readRDS("./fullDataset/rds/scRNA_FLCnew-1-alternate.rds")
+```
+
+```{r}
+cellchat <- computeCommunProb(cellchat, type = "triMean", population.size = TRUE)
+cellchat <- filterCommunication(cellchat, min.cells = 10)
+cellchat <- computeCommunProbPathway(cellchat)
+saveRDS(cellchat, "./fullDataset/rds/scRNA_FLCnew-2-alternate.rds")
+cellchat <- readRDS("./fullDataset/rds/scRNA_FLCnew-2-alternate.rds")
+```
+
+```{r Calculate the aggregated cell-cell communication network}
+dir.create("./revisedDataset/cellChat/FLCnew")
+cellchat <- aggregateNet(cellchat)
+groupSize <- as.numeric(table(cellchat@idents)) # number of cells in each cell group
+levels(cellchat@idents)
+```
+
+```{r Subset the inferred cell-cell communications of interest}
+df.net <- subsetCommunication(cellchat)
+df_net <- subsetCommunication(cellchat, signaling = c(unique(df.net$pathway_name)), slot.name = "net")
+df_net
+write.csv(df.net, "./revisedDataset/cellChat/FLCnew/cellChat-allInferredCommunications.csv")
+write.csv(df_net, "./revisedDataset/cellChat/FLCnew/cellChat-upregulatedPathways-ofInterest.csv")
+```
+
+## Calculate the aggregated cell-cell communication network
+```{r}
+dir.create("./revisedDataset/cellChat/FLCnew/plots")
+groupSize <- as.numeric(table(cellchat@idents))
+par(mfrow = c(1,2), xpd=TRUE)
+netVisual_circle(cellchat@net$count, vertex.weight = groupSize, weight.scale = T, label.edge= F, title.name = "Number of interactions", shape = "circle", vertex.label.cex = .8, margin = .5)
+netVisual_circle(cellchat@net$weight, vertex.weight = groupSize, weight.scale = T, label.edge= F, title.name = "Interaction weights/strength", vertex.label.cex = .8, margin = .5)
+```
+
+```{r}
+png("./revisedDataset/cellChat/FLCnew/plots/aggregatedCommunicationNetwork_NumberofInteractions_count.png", width = 6, height = 6, units = "in", res = 300)  # Adjust dimensions and resolution
+netVisual_circle(cellchat@net$count, vertex.weight = groupSize, weight.scale = T, label.edge= F, title.name = "FLC subset:Number of interactions", shape = "circle", vertex.label.cex = .8, margin = .5)
+dev.off()
+```
+
+```{r}
+png("./revisedDataset/cellChat/FLCnew/plots/aggregatedCommunicationNetwork_NumberofInteractions_weight.png", width = 6, height = 6, units = "in", res = 300)  # Adjust dimensions and resolution
+netVisual_circle(cellchat@net$weight, vertex.weight = groupSize, weight.scale = T, label.edge= F, title.name = "FLC subset:Interaction weights/strength", vertex.label.cex = .8, margin = .5)
+dev.off()
+```
+
+```{r}
+mat <- cellchat@net$weight
+par(mfrow = c(3,4), xpd=TRUE)
+for (i in 1:nrow(mat)) {
+  mat2 <- matrix(0, nrow = nrow(mat), ncol = ncol(mat), dimnames = dimnames(mat))
+  mat2[i, ] <- mat[i, ]
+  netVisual_circle(mat2, vertex.weight = groupSize, weight.scale = T, edge.weight.max = max(mat), title.name = rownames(mat)[i])
+}
+```
+
+```{r}
+# Iterate through each row in mat
+dir.create("./revisedDataset/cellChat/FLCnew/plots/cellTypeSignaling/")
+for (i in 1:nrow(mat)) {
+  # Create a new matrix with zeros and set the current row values
+  mat2 <- matrix(0, nrow = nrow(mat), ncol = ncol(mat), dimnames = dimnames(mat))
+  mat2[i, ] <- mat[i, ]
+  
+  # Define the output file name
+  output_filename <- paste0("./revisedDataset/cellChat/FLCnew/plots/cellTypeSignaling/", "FLCsubset-aggregatedCommunicationNetwork_byCell_weight", i, ".png")
+  
+  # Open a new graphics device and save the plot
+  png(output_filename, width = 6, height = 6, units = "in", res = 300)
+  netVisual_circle(mat2, vertex.weight = groupSize, weight.scale = TRUE, edge.weight.max = max(mat), title.name = rownames(mat)[i])
+  dev.off()
+}
+```
+
+```{r }
+# pathways showing significant communications
+cellchat@netP$pathways
+# Access all the signaling pathways showing significant communications
+pathways.show.all <- cellchat@netP$pathways
+dir.create("./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/")
+for (i in pathways.show.all) {
+  dir.create(paste0("./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/", i))
+  }
+```
+
+```{r}
+# check the order of cell identity to set suitable vertex.receiver
+levels(cellchat@idents)
+vertex.receiver = seq(3)
+# Loop through pathways and save images in their respective directories
+for (i in 1:length(pathways.show.all)) {
+  pathway_dir <- pathways.show.all[i]
+  dir_path <- paste0("./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/", pathway_dir)
+
+  # Visualize communication network associated with both signaling pathway and individual L-R pairs
+  netVisual(cellchat, signaling = pathway_dir, vertex.receiver = vertex.receiver, layout = "hierarchy")
+
+  # Compute and visualize the contribution of each ligand-receptor pair to the overall signaling pathway
+  gg <- netAnalysis_contribution(cellchat, signaling = pathway_dir)
+
+  # Specify the full path for saving the image
+  image_filename <- paste0(dir_path, "/", pathway_dir, "_FLCsubset_L-R_contribution.pdf")
+
+  # Save the image in the pathway-specific directory
+  ggsave(filename = image_filename, plot = gg, width = 5, height = 2, units = 'in', dpi = 300)
+}
+```
+
+### PERIOSTIN analysis
+
+```{r}
+pathways.show <- c("PERIOSTIN") 
+# Hierarchy plot
+# Here we define `vertex.receive` so that the left portion of the hierarchy plot shows signaling to fibroblast and the right portion shows signaling to immune cells 
+vertex.receiver = seq(1,4) # a numeric vector. 
+netVisual_aggregate(cellchat, signaling = pathways.show,  vertex.receiver = vertex.receiver)
+# Circle plot
+par(mfrow=c(1,1))
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/PERIOSTIN/FLCcircle_diagram.png", width = 10, height = 8, units = "in", res = 600)
+netVisual_aggregate(cellchat, signaling = pathways.show, layout = "circle")
+dev.off()
+```
+
+```{r}
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/PERIOSTIN/FLCchord_diagram.png", width = 22, height = 20, units = "cm", res = 600)
+netVisual_aggregate(cellchat, signaling = pathways.show, layout = "chord", vertex.label.cex = 1)
+dev.off()
+```
+
+```{r}
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/PERIOSTIN/FLCchord_L-R_diagram.png", width = 13, height = 13, units = "cm", res = 600)
+netVisual_chord_gene(cellchat, sources.use = c(1:12), targets.use = c(1:12), signaling = c("PERIOSTIN"), legend.pos.x = 8, lab.cex = 1.2)
+dev.off()
+```
+
+```{r}
+# Heatmap
+par(mfrow=c(1,1))
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/PERIOSTIN/FLC_heatmap.png", width = 10, height = 8, units = "in", res = 300)
+netVisual_heatmap(cellchat, signaling = pathways.show, color.heatmap = "Reds")
+dev.off()
+#> Do heatmap based on a single object
+```
+
+```{r}
+pairLR.PERIO <- extractEnrichedLR(cellchat, signaling = pathways.show, geneLR.return = FALSE)
+LR.show <- pairLR.PERIO[1,] # show one ligand-receptor pair
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/PERIOSTIN/FLCchord_diagram_LRpair.png", width = 10, height = 8, units = "in", res = 600)
+netVisual_individual(cellchat, signaling = pathways.show, pairLR.use = LR.show, layout = "chord")
+dev.off()
+```
+
+```{r}
+# show all the significant interactions (L-R pairs) from some cell groups (defined by 'sources.use') to other cell groups (defined by 'targets.use')
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/PERIOSTIN/FLC_PERIOSTIN_L-R_contribution.png", width = 5, height = 4, units = "in", res = 600)
+netVisual_bubble(cellchat,remove.isolate = FALSE, signaling = c("PERIOSTIN"))
+dev.off()
+#> Comparing communications on a single object
+```
+
+```{r Plot gene expression}
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/PERIOSTIN/FLC_diagram_LRpairs_Expression.png", width = 8, height = 6, units = "in", res = 600)
+plotGeneExpression(cellchat, signaling = "PERIOSTIN", enriched.only = TRUE)
+dev.off()
+```
+
+### Dissection of PDGF pathway
+
+```{r}
+pathways.show <- c("PDGF") 
+# Hierarchy plot
+# Here we define `vertex.receive` so that the left portion of the hierarchy plot shows signaling to fibroblast and the right portion shows signaling to immune cells 
+vertex.receiver = seq(1,4) # a numeric vector. 
+netVisual_aggregate(cellchat, signaling = pathways.show,  vertex.receiver = vertex.receiver)
+# Circle plot
+par(mfrow=c(1,1))
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/PDGF/FLCcircle_diagram.png", width = 10, height = 8, units = "in", res = 600)
+netVisual_aggregate(cellchat, signaling = pathways.show, layout = "circle")
+dev.off()
+```
+
+```{r}
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/PDGF/FLCchord_diagram.png", width = 22, height = 20, units = "cm", res = 600)
+netVisual_aggregate(cellchat, signaling = pathways.show, layout = "chord", vertex.label.cex = 1)
+dev.off()
+```
+
+```{r}
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/PDGF/FLCchord_L-R_diagram.png", width = 17, height = 15, units = "cm", res = 600)
+netVisual_chord_gene(cellchat, sources.use = c(1:12), targets.use = c(1:12), signaling = c("PDGF"), legend.pos.x = -20, legend.pos.y = 1, lab.cex = 1.5)
+dev.off()
+```
+
+```{r}
+# Heatmap
+par(mfrow=c(1,1))
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/PDGF/FLC_heatmap.png", width = 10, height = 8, units = "in", res = 300)
+netVisual_heatmap(cellchat, signaling = pathways.show, color.heatmap = "Reds")
+dev.off()
+#> Do heatmap based on a single object
+```
+
+```{r}
+pairLR.PDGF <- extractEnrichedLR(cellchat, signaling = pathways.show, geneLR.return = FALSE)
+LR.show <- pairLR.PDGF[1,] # show one ligand-receptor pair
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/PDGF/FLCchord_diagram_LR_pair1.png", width = 10, height = 8, units = "in", res = 600)
+netVisual_individual(cellchat, signaling = pathways.show, pairLR.use = LR.show, layout = "chord")
+dev.off()
+```
+
+```{r}
+# show all the significant interactions (L-R pairs) from some cell groups (defined by 'sources.use') to other cell groups (defined by 'targets.use')
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/PDGF/FLC_PDGF_L-R_contribution.png", width = 5, height = 4, units = "in", res = 600)
+netVisual_bubble(cellchat,remove.isolate = FALSE, signaling = c("PDGF"))
+dev.off()
+#> Comparing communications on a single object
+```
+
+```{r Plot gene expression}
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/PDGF/FLC_diagram_LRpairs_Expression.png", width = 8, height = 6, units = "in", res = 600)
+plotGeneExpression(cellchat, signaling = "PDGF", enriched.only = TRUE)
+dev.off()
+```
+
+### FGF pathway dissection
+
+```{r}
+pathways.show <- c("FGF") 
+# Hierarchy plot
+# Here we define `vertex.receive` so that the left portion of the hierarchy plot shows signaling to fibroblast and the right portion shows signaling to immune cells 
+vertex.receiver = seq(1,4) # a numeric vector. 
+netVisual_aggregate(cellchat, signaling = pathways.show,  vertex.receiver = vertex.receiver)
+# Circle plot
+par(mfrow=c(1,1))
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/FGF/FLCcircle_diagram.png", width = 10, height = 8, units = "in", res = 600)
+netVisual_aggregate(cellchat, signaling = pathways.show, layout = "circle")
+dev.off()
+```
+
+```{r}
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/FGF/FLCchord_diagram.png", width = 22, height = 20, units = "cm", res = 600)
+netVisual_aggregate(cellchat, signaling = pathways.show, layout = "chord", vertex.label.cex = 1)
+dev.off()
+```
+
+```{r}
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/FGF/FLCchord_L-R_diagram.png", width = 10, height = 10, units = "cm", res = 600)
+netVisual_chord_gene(cellchat, sources.use = c(1:12), targets.use = c(1:12), signaling = c("FGF"), legend.pos.x = -2, legend.pos.y = 5, lab.cex = 1.5)
+dev.off()
+```
+
+```{r}
+# Heatmap
+par(mfrow=c(1,1))
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/FGF/FLC_heatmap.png", width = 5, height = 6, units = "in", res = 600)
+netVisual_heatmap(cellchat, signaling = pathways.show, color.heatmap = "Reds")
+dev.off()
+#> Do heatmap based on a single object
+```
+
+```{r}
+pairLR.FGF <- extractEnrichedLR(cellchat, signaling = pathways.show, geneLR.return = FALSE)
+LR.show <- pairLR.FGF[1,] # show one ligand-receptor pair
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/FGF/FLCchord_diagram_LR_pair1.png", width = 7, height = 7, units = "in", res = 600)
+netVisual_individual(cellchat, signaling = pathways.show, pairLR.use = LR.show, layout = "chord")
+dev.off()
+```
+
+```{r}
+# show all the significant interactions (L-R pairs) from some cell groups (defined by 'sources.use') to other cell groups (defined by 'targets.use')
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/FGF/FLC_FGF_L-R_contribution.png", width = 4, height = 3, units = "in", res = 600)
+netVisual_bubble(cellchat,remove.isolate = FALSE, signaling = c("FGF"))
+dev.off()
+#> Comparing communications on a single object
+```
+
+```{r Plot gene expression}
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/FGF/FLC_diagram_LRpairs_Expression.png", width = 7, height = 5, units = "in", res = 600)
+plotGeneExpression(cellchat, signaling = "FGF", enriched.only = TRUE)
+dev.off()
+```
+
+
+### VEGFA pathway dissection
+
+```{r}
+pathways.show <- c("VEGF") 
+# Hierarchy plot
+# Here we define `vertex.receive` so that the left portion of the hierarchy plot shows signaling to fibroblast and the right portion shows signaling to immune cells 
+vertex.receiver = seq(1,4) # a numeric vector. 
+netVisual_aggregate(cellchat, signaling = pathways.show,  vertex.receiver = vertex.receiver)
+# Circle plot
+par(mfrow=c(1,1))
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/VEGF/FLCcircle_diagram.png", width = 10, height = 8, units = "in", res = 600)
+netVisual_aggregate(cellchat, signaling = pathways.show, layout = "circle")
+dev.off()
+```
+
+```{r}
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/VEGF/FLCchord_diagram.png", width = 10, height = 8, units = "in", res = 600)
+netVisual_aggregate(cellchat, signaling = pathways.show, layout = "chord")
+dev.off()
+```
+
+```{r}
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/VEGF/FLCchord_L-R_diagram.png", width = 10, height = 8, units = "in", res = 600)
+netVisual_chord_gene(cellchat, sources.use = c(1:12), targets.use = c(1:12), signaling = c("VEGF"), legend.pos.x = 8)
+dev.off()
+```
+
+```{r}
+# Heatmap
+par(mfrow=c(1,1))
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/VEGF/FLC_heatmap.png", width = 10, height = 8, units = "in", res = 300)
+netVisual_heatmap(cellchat, signaling = pathways.show, color.heatmap = "Reds")
+dev.off()
+#> Do heatmap based on a single object
+```
+
+```{r}
+pairLR.PERIO <- extractEnrichedLR(cellchat, signaling = pathways.show, geneLR.return = FALSE)
+LR.show <- pairLR.PERIO[1,] # show one ligand-receptor pair
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/VEGF/FLCchord_diagram_LRpair.png", width = 10, height = 8, units = "in", res = 600)
+netVisual_individual(cellchat, signaling = pathways.show, pairLR.use = LR.show, layout = "chord")
+dev.off()
+```
+
+```{r}
+# show all the significant interactions (L-R pairs) from some cell groups (defined by 'sources.use') to other cell groups (defined by 'targets.use')
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/VEGF/FLC_PERIOSTIN_L-R_contribution.png", width = 5, height = 4, units = "in", res = 600)
+netVisual_bubble(cellchat,remove.isolate = FALSE, signaling = c("VEGF"))
+dev.off()
+#> Comparing communications on a single object
+```
+
+```{r Plot gene expression}
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/VEGF/FLC_diagram_LRpairs_Expression.png", width = 8, height = 6, units = "in", res = 600)
+plotGeneExpression(cellchat, signaling = "VEGF", enriched.only = TRUE)
+dev.off()
+```
+
+### TGFb pathway dissection
+
+```{r}
+pathways.show <- c("TGFb") 
+# Hierarchy plot
+# Here we define `vertex.receive` so that the left portion of the hierarchy plot shows signaling to fibroblast and the right portion shows signaling to immune cells 
+vertex.receiver = seq(1,4) # a numeric vector. 
+netVisual_aggregate(cellchat, signaling = pathways.show,  vertex.receiver = vertex.receiver)
+# Circle plot
+par(mfrow=c(1,1))
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/TGFb/FLCcircle_diagram.png", width = 10, height = 8, units = "in", res = 600)
+netVisual_aggregate(cellchat, signaling = pathways.show, layout = "circle")
+dev.off()
+```
+
+```{r}
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/TGFb/FLCchord_diagram.png", width = 10, height = 8, units = "in", res = 600)
+netVisual_aggregate(cellchat, signaling = pathways.show, layout = "chord", vertex.label.cex = 1)
+dev.off()
+```
+
+```{r}
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/TGFb/FLCchord_L-R_diagram.png", width = 10, height = 8, units = "in", res = 600)
+netVisual_chord_gene(cellchat, sources.use = c(1:12), targets.use = c(1:12), signaling = c("TGFb"), legend.pos.x = 8, lab.cex = 1.5)
+dev.off()
+```
+
+
+```{r}
+# Heatmap
+par(mfrow=c(1,1))
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/TGFb/FLC_heatmap.png", width = 10, height = 8, units = "in", res = 300)
+netVisual_heatmap(cellchat, signaling = pathways.show, color.heatmap = "Reds")
+dev.off()
+#> Do heatmap based on a single object
+```
+
+```{r}
+pairLR.PERIO <- extractEnrichedLR(cellchat, signaling = pathways.show, geneLR.return = FALSE)
+LR.show <- pairLR.PERIO[1,] # show one ligand-receptor pair
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/TGFb/FLCchord_diagram_LRpair.png", width = 10, height = 8, units = "in", res = 600)
+netVisual_individual(cellchat, signaling = pathways.show, pairLR.use = LR.show, layout = "chord")
+dev.off()
+```
+
+```{r}
+# show all the significant interactions (L-R pairs) from some cell groups (defined by 'sources.use') to other cell groups (defined by 'targets.use')
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/TGFb/FLC_PERIOSTIN_L-R_contribution.png", width = 5, height = 4, units = "in", res = 600)
+netVisual_bubble(cellchat,remove.isolate = FALSE, signaling = c("TGFb"))
+dev.off()
+#> Comparing communications on a single object
+```
+
+```{r Plot gene expression}
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/TGFb/FLC_diagram_LRpairs_Expression.png", width = 8, height = 6, units = "in", res = 600)
+plotGeneExpression(cellchat, signaling = "TGFb", enriched.only = TRUE)
+dev.off()
+```
+
+### CALCR pathway dissection
+
+```{r}
+pathways.show <- c("CALCR") 
+# Hierarchy plot
+# Here we define `vertex.receive` so that the left portion of the hierarchy plot shows signaling to fibroblast and the right portion shows signaling to immune cells 
+vertex.receiver = seq(1,4) # a numeric vector. 
+netVisual_aggregate(cellchat, signaling = pathways.show,  vertex.receiver = vertex.receiver)
+# Circle plot
+par(mfrow=c(1,1))
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/CALCR/FLCcircle_diagram.png", width = 10, height = 8, units = "in", res = 600)
+netVisual_aggregate(cellchat, signaling = pathways.show, layout = "circle")
+dev.off()
+```
+
+```{r}
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/CALCR/FLCchord_diagram.png", width = 10, height = 8, units = "in", res = 600)
+netVisual_aggregate(cellchat, signaling = pathways.show, layout = "chord", vertex.label.cex = 1)
+dev.off()
+```
+
+```{r}
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/CALCR/FLCchord_L-R_diagram.png", width = 10, height = 8, units = "in", res = 600)
+netVisual_chord_gene(cellchat, sources.use = c(1:12), targets.use = c(1:12), signaling = c("CALCR"), legend.pos.x = 8, lab.cex = 1.5)
+dev.off()
+```
+
+```{r}
+# Heatmap
+par(mfrow=c(1,1))
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/CALCR/FLC_heatmap.png", width = 5, height = 6, units = "in", res = 300)
+netVisual_heatmap(cellchat, signaling = pathways.show, color.heatmap = "Reds")
+dev.off()
+#> Do heatmap based on a single object
+```
+
+```{r}
+pairLR.CALCR <- extractEnrichedLR(cellchat, signaling = pathways.show, geneLR.return = FALSE)
+LR.show <- pairLR.CALCR[1,] # show one ligand-receptor pair
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/CALCR/FLCchord_diagram_LRpair.png", width = 7, height = 7, units = "in", res = 600)
+netVisual_individual(cellchat, signaling = pathways.show, pairLR.use = LR.show, layout = "chord")
+dev.off()
+```
+
+```{r}
+# show all the significant interactions (L-R pairs) from some cell groups (defined by 'sources.use') to other cell groups (defined by 'targets.use')
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/CALCR/FLC_CALCR_L-R_contribution.png", width = 4, height = 3, units = "in", res = 600)
+netVisual_bubble(cellchat,remove.isolate = FALSE, signaling = c("CALCR"))
+dev.off()
+#> Comparing communications on a single object
+```
+
+```{r Plot gene expression}
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/CALCR/FLC_diagram_LRpairs_Expression.png", width = 7, height = 5, units = "in", res = 600)
+plotGeneExpression(cellchat, signaling = "CALCR", enriched.only = TRUE)
+dev.off()
+```
+
+### EGF analysis
+
+```{r}
+pathways.show <- c("EGF") 
+# Hierarchy plot
+# Here we define `vertex.receive` so that the left portion of the hierarchy plot shows signaling to fibroblast and the right portion shows signaling to immune cells 
+vertex.receiver = seq(1,4) # a numeric vector. 
+netVisual_aggregate(cellchat, signaling = pathways.show,  vertex.receiver = vertex.receiver)
+# Circle plot
+par(mfrow=c(1,1))
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/EGF/FLCcircle_diagram.png", width = 10, height = 8, units = "in", res = 600)
+netVisual_aggregate(cellchat, signaling = pathways.show, layout = "circle")
+dev.off()
+```
+
+```{r}
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/EGF/FLCchord_diagram.png", width = 10, height = 10, units = "in", res = 600)
+netVisual_aggregate(cellchat, signaling = pathways.show, layout = "chord", vertex.label.cex = 1)
+dev.off()
+```
+
+```{r}
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/EGF/FLCchord_L-R_diagram.png", width = 10, height = 10, units = "in", res = 600)
+netVisual_chord_gene(cellchat, sources.use = c(1:12), targets.use = c(1:12), signaling = c("EGF"), legend.pos.x = 8, lab.cex = 1.2)
+dev.off()
+```
+
+```{r}
+# Heatmap
+par(mfrow=c(1,1))
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/EGF/FLC_heatmap.png", width = 10, height = 8, units = "in", res = 300)
+netVisual_heatmap(cellchat, signaling = pathways.show, color.heatmap = "Reds")
+dev.off()
+#> Do heatmap based on a single object
+```
+
+```{r}
+pairLR.PERIO <- extractEnrichedLR(cellchat, signaling = pathways.show, geneLR.return = FALSE)
+LR.show <- pairLR.PERIO[1,] # show one ligand-receptor pair
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/EGF/FLCchord_diagram_LRpair.png", width = 10, height = 8, units = "in", res = 600)
+netVisual_individual(cellchat, signaling = pathways.show, pairLR.use = LR.show, layout = "chord")
+dev.off()
+```
+
+```{r}
+# show all the significant interactions (L-R pairs) from some cell groups (defined by 'sources.use') to other cell groups (defined by 'targets.use')
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/EGF/FLC_EGF_L-R_contribution.png", width = 5, height = 4, units = "in", res = 600)
+netVisual_bubble(cellchat,remove.isolate = FALSE, signaling = c("EGF"))
+dev.off()
+#> Comparing communications on a single object
+```
+
+```{r Plot gene expression}
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/EGF/FLC_diagram_LRpairs_Expression.png", width = 8, height = 6, units = "in", res = 600)
+plotGeneExpression(cellchat, signaling = "EGF", enriched.only = TRUE)
+dev.off()
+```
+
+
+
+### SPP1 analysis
+
+```{r}
+pathways.show <- c("SPP1") 
+# Hierarchy plot
+# Here we define `vertex.receive` so that the left portion of the hierarchy plot shows signaling to fibroblast and the right portion shows signaling to immune cells 
+vertex.receiver = seq(1,4) # a numeric vector. 
+netVisual_aggregate(cellchat, signaling = pathways.show,  vertex.receiver = vertex.receiver)
+# Circle plot
+par(mfrow=c(1,1))
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/SPP1/FLCcircle_diagram.png", width = 10, height = 8, units = "in", res = 600)
+netVisual_aggregate(cellchat, signaling = pathways.show, layout = "circle")
+dev.off()
+```
+
+```{r}
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/SPP1/FLCchord_diagram.png", width = 10, height = 10, units = "in", res = 600)
+netVisual_aggregate(cellchat, signaling = pathways.show, layout = "chord", vertex.label.cex = 1)
+dev.off()
+```
+
+```{r}
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/SPP1/FLCchord_L-R_diagram.png", width = 10, height = 10, units = "in", res = 600)
+netVisual_chord_gene(cellchat, sources.use = c(1:12), targets.use = c(1:12), signaling = c("SPP1"), legend.pos.x = 8, lab.cex = 1.2)
+dev.off()
+```
+
+```{r}
+# Heatmap
+par(mfrow=c(1,1))
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/SPP1/FLC_heatmap.png", width = 10, height = 8, units = "in", res = 300)
+netVisual_heatmap(cellchat, signaling = pathways.show, color.heatmap = "Reds")
+dev.off()
+#> Do heatmap based on a single object
+```
+
+```{r}
+pairLR.PERIO <- extractEnrichedLR(cellchat, signaling = pathways.show, geneLR.return = FALSE)
+LR.show <- pairLR.PERIO[1,] # show one ligand-receptor pair
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/SPP1/FLCchord_diagram_LRpair.png", width = 10, height = 8, units = "in", res = 600)
+netVisual_individual(cellchat, signaling = pathways.show, pairLR.use = LR.show, layout = "chord")
+dev.off()
+```
+
+```{r}
+# show all the significant interactions (L-R pairs) from some cell groups (defined by 'sources.use') to other cell groups (defined by 'targets.use')
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/SPP1/FLC_SPP1_L-R_contribution.png", width = 5, height = 4, units = "in", res = 600)
+netVisual_bubble(cellchat,remove.isolate = FALSE, signaling = c("SPP1"))
+dev.off()
+#> Comparing communications on a single object
+```
+
+```{r Plot gene expression}
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/SPP1/FLC_diagram_LRpairs_Expression.png", width = 8, height = 6, units = "in", res = 600)
+plotGeneExpression(cellchat, signaling = "SPP1", enriched.only = TRUE)
+dev.off()
+```
+
+
+
+
+### MIF analysis
+
+```{r}
+pathways.show <- c("MIF") 
+# Hierarchy plot
+# Here we define `vertex.receive` so that the left portion of the hierarchy plot shows signaling to fibroblast and the right portion shows signaling to immune cells 
+vertex.receiver = seq(1,4) # a numeric vector. 
+netVisual_aggregate(cellchat, signaling = pathways.show,  vertex.receiver = vertex.receiver)
+# Circle plot
+par(mfrow=c(1,1))
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/MIF/FLCcircle_diagram.png", width = 10, height = 8, units = "in", res = 600)
+netVisual_aggregate(cellchat, signaling = pathways.show, layout = "circle")
+dev.off()
+```
+
+```{r}
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/MIF/FLCchord_diagram.png", width = 10, height = 10, units = "in", res = 600)
+netVisual_aggregate(cellchat, signaling = pathways.show, layout = "chord", vertex.label.cex = 1)
+dev.off()
+```
+
+```{r}
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/MIF/FLCchord_L-R_diagram.png", width = 10, height = 10, units = "in", res = 600)
+netVisual_chord_gene(cellchat, sources.use = c(1:12), targets.use = c(1:12), signaling = c("MIF"), legend.pos.x = 8, lab.cex = 1.2)
+dev.off()
+```
+
+```{r}
+# Heatmap
+par(mfrow=c(1,1))
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/MIF/FLC_heatmap.png", width = 10, height = 8, units = "in", res = 300)
+netVisual_heatmap(cellchat, signaling = pathways.show, color.heatmap = "Reds")
+dev.off()
+#> Do heatmap based on a single object
+```
+
+```{r}
+pairLR.PERIO <- extractEnrichedLR(cellchat, signaling = pathways.show, geneLR.return = FALSE)
+LR.show <- pairLR.PERIO[1,] # show one ligand-receptor pair
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/MIF/FLCchord_diagram_LRpair.png", width = 10, height = 8, units = "in", res = 600)
+netVisual_individual(cellchat, signaling = pathways.show, pairLR.use = LR.show, layout = "chord")
+dev.off()
+```
+
+```{r}
+# show all the significant interactions (L-R pairs) from some cell groups (defined by 'sources.use') to other cell groups (defined by 'targets.use')
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/MIF/FLC_MIF_L-R_contribution.png", width = 5, height = 4, units = "in", res = 600)
+netVisual_bubble(cellchat,remove.isolate = FALSE, signaling = c("MIF"))
+dev.off()
+#> Comparing communications on a single object
+```
+
+```{r Plot gene expression}
+png(file ="./revisedDataset/cellChat/FLCnew/plots/pathwayDissections/MIF/FLC_diagram_LRpairs_Expression.png", width = 8, height = 6, units = "in", res = 600)
+plotGeneExpression(cellchat, signaling = "MIF", enriched.only = TRUE)
+dev.off()
+```
+
+
+
+### Part IV: Systems analysis of cell-cell communication network
+
+```{r}
+dir.create("./revisedDataset/cellChat/FLCnew/plots/SystemsLevelAnalysis")
+```
+
+
+```{r}
+ptm = Sys.time()
+# Compute the network centrality scores
+cellchat <- netAnalysis_computeCentrality(cellchat, slot.name = "netP") # the slot 'netP' means the inferred intercellular communication network of signaling pathways
+# Visualize the computed centrality scores using heatmap, allowing ready identification of major signaling roles of cell groups
+netAnalysis_signalingRole_network(cellchat, signaling = pathways.show, width = 8, height = 2.5, font.size = 10)
+```
+
+```{r}
+# Signaling role analysis on the aggregated cell-cell communication network from all signaling pathways
+gg1 <- netAnalysis_signalingRole_scatter(cellchat)
+#> Signaling role analysis on the aggregated cell-cell communication network from all signaling pathways
+# Signaling role analysis on the cell-cell communication networks of interest
+gg2 <- netAnalysis_signalingRole_scatter(cellchat, signaling = c("PERIOSTIN", "VEGFA", "TGFb", "PDGF", "FGF", "CALCR"))
+#> Signaling role analysis on the cell-cell communication network from user's input
+gg1 + gg2
+png(file ="./revisedDataset/cellChat/FLCnew/plots/SystemsLevelAnalysis/SignalingRolesScatter.png", width = 5, height = 4, units = "in", res = 600)
+gg1
+dev.off()
+```
+
+```{r}
+# Signaling role analysis on the aggregated cell-cell communication network from all signaling pathways
+ht1 <- netAnalysis_signalingRole_heatmap(cellchat, pattern = "outgoing")
+ht2 <- netAnalysis_signalingRole_heatmap(cellchat, pattern = "incoming")
+png(file ="./revisedDataset/cellChat/FLCnew/plots/SystemsLevelAnalysis/SignalingRole_out-in-going.png", width = 10, height = 6, units = "in", res = 600)
+ht1 + ht2
+dev.off()
+```
+## Identify global communication patterns to explore how multiple cell types and signaling pathways coordinate together
+
+### Identify and visualize outgoing communication pattern of secreting cells
+
+```{r}
+selectK(cellchat, pattern = "outgoing")
+```
+
+```{r}
+nPatterns = 3
+png(file ="./revisedDataset/cellChat/FLCnew/plots/SystemsLevelAnalysis/OutgoingPatterns.png", width = 10, height = 3, units = "in", res = 600)
+cellchat <- identifyCommunicationPatterns(cellchat, pattern = "outgoing", k = nPatterns)
+dev.off()
+```
+
+```{r}
+# river plot
+png(file ="./revisedDataset/cellChat/FLCnew/plots/SystemsLevelAnalysis/OutgoingPatterns_riverplot.png", width = 10, height = 6, units = "in", res = 600)
+netAnalysis_river(cellchat, pattern = "outgoing")
+dev.off()
+#> Please make sure you have load `library(ggalluvial)` when running this function
+```
+
+```{r}
+# dot plot
+png(file ="./revisedDataset/cellChat/FLCnew/plots/SystemsLevelAnalysis/OutgoingPatterns_dotplot.png", width = 10, height = 6, units = "in", res = 600)
+netAnalysis_dot(cellchat, pattern = "outgoing")
+dev.off()
+```
+### Incoming signaling
+
+```{r}
+selectK(cellchat, pattern = "incoming")
+```
+
+```{r}
+nPatterns = 2
+png(file ="./revisedDataset/cellChat/FLCnew/plots/SystemsLevelAnalysis/IncomingPatterns.png", width = 10, height = 3, units = "in", res = 600)
+cellchat <- identifyCommunicationPatterns(cellchat, pattern = "incoming", k = nPatterns)
+dev.off()
+```
+```{r}
+# river plot
+png(file ="./revisedDataset/cellChat/FLCnew/plots/SystemsLevelAnalysis/IncomingPatterns_riverplot.png", width = 10, height = 6, units = "in", res = 600)
+netAnalysis_river(cellchat, pattern = "incoming")
+dev.off()
+#> Please make sure you have load `library(ggalluvial)` when running this function
+```
+
+```{r}
+# dot plot
+png(file ="./revisedDataset/cellChat/FLCnew/plots/SystemsLevelAnalysis/IncomingPatterns_dotplot.png", width = 10, height = 6, units = "in", res = 600)
+netAnalysis_dot(cellchat, pattern = "incoming")
+dev.off()
+```
+
+### Manifold and classification learning analysis of signaling networks
+
+```{r}
+use_python("/home/af547/miniconda3/bin/python")
+cellchat <- computeNetSimilarity(cellchat, type = "functional")
+cellchat <- netEmbedding(cellchat, type = "functional")
+#> Manifold learning of the signaling networks for a single dataset
+cellchat <- netClustering(cellchat, type = "functional", do.parallel = FALSE)
+#> Classification learning of the signaling networks for a single dataset
+# Visualization in 2D-space
+netVisual_embedding(cellchat, type = "functional", label.size = 3.5)
+```
+
+```{r}
+cellchat <- computeNetSimilarity(cellchat, type = "structural")
+cellchat <- netEmbedding(cellchat, type = "structural")
+#> Manifold learning of the signaling networks for a single dataset
+cellchat <- netClustering(cellchat, type = "structural", do.parallel = FALSE)
+#> Classification learning of the signaling networks for a single dataset
+# Visualization in 2D-space
+netVisual_embedding(cellchat, type = "structural", label.size = 3.5)
+```
+
+```{r}
+saveRDS(cellchat, "./fullDataset/rds/scRNA_FLCnew-2.rds")
+```
+
