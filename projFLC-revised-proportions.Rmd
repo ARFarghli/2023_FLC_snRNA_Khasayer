@@ -282,3 +282,40 @@ treemap_nml_plot <- ggplot(treemap_nml, aes(area = Freq, fill = Cluster,
 treemap_nml_plot + ggsave("revisedDataset/proportions/nml_treemap-removedClusters_Unk_Epi6.png", width = 5, height = 3, units = "in", dpi = 600)
 ```
 
+## Status per cluster
+
+```{r}
+status.count <- as.data.frame(table(harmonized.seurat$cluster_id_named, harmonized.seurat$status))
+status.prop <- as.data.frame(prop.table(table(harmonized.seurat$cluster_id_named, harmonized.seurat$status), margin = 1)) %>% 
+  dplyr::rename(Cluster = "Var1") %>% 
+  dplyr::rename(Status = "Var2") %>% 
+  dplyr::rename(Fraction = "Freq") %>% 
+  dplyr::mutate(Percent = (Fraction * 100))
+
+levels(status.prop$Status)
+```
+
+```{r}
+p <- ggplot(status.prop, aes(x = Cluster, y = Percent, fill = Status)) +
+  geom_col(color = 'black') +
+  theme_classic() +
+  ylim(c(0,101)) + 
+  theme(plot.margin = margin(1, 1, 1, 1, "in"),
+        axis.text.x = element_text(angle = 60,
+                                   hjust = 1,
+                                   size = 10,
+                                   face = "bold")) +
+  scale_fill_manual(values = c("#272E6A",
+                    "#89288F"))
+p
+```
+
+```{r}
+p + ggsave(filename = "./revisedDataset/proportions/Proportions-cluster-by-status-NAMED.png", width = 8, height = 10) + 
+  theme(plot.margin = margin(1, 1, 1, 1, "in"),
+        axis.text.x = element_text(angle = 60,
+                                   hjust = 1,
+                                   size = 10,
+                                   face = "bold"))
+```
+

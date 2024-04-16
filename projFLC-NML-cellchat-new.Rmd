@@ -100,6 +100,29 @@ saveRDS(cellchat, "./fullDataset/rds/scRNA_NMLnew-2-alternative.rds")
 cellchat <- readRDS("./fullDataset/rds/scRNA_NMLnew-2-alternative.rds")
 ```
 
+```{r}
+levels = c("Liver epithelial cells 1","Liver epithelial cells 2", "Liver epithelial cells 3", "Liver epithelial cells 4", "Liver epithelial cells 5", "Liver epithelial cells 6", "Endothelial cells", "Stellate cells", "Neutrophils and macrophages", "Lymphocytes", "Cholangiocyte cells", "Unknown") # set factor
+cellchat <- updateClusterLabels(cellchat, new.order = levels)
+levels(cellchat@idents)
+```
+
+
+```{r}
+cols <- c("Liver epithelial cells 1" = "#0072B2",
+             "Liver epithelial cells 2" = "#cab2d6",
+             "Endothelial cells" = "#6a3d9a",
+             "Liver epithelial cells 3" = "#DDCC77",
+             "Liver epithelial cells 4" = "#ff7f00",
+             "Stellate cells" = "#33a02c",
+             "Liver epithelial cells 5" = "#AA4499",
+             "Cholangiocyte cells" = "#CC6677",
+             "Neutrophils and macrophages" = "#44AA99",
+             "Lymphocytes" = "#8C87E6",
+             "Liver epithelial cells 6" = "#FF6B6B",
+             "Unknown" = "#b15928")
+```
+
+
 ```{r Calculate the aggregated cell-cell communication network}
 dir.create("./revisedDataset/cellChat/NMLnew")
 cellchat <- aggregateNet(cellchat)

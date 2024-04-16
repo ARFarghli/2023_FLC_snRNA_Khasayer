@@ -1,7 +1,7 @@
 ---
-title: "Combined cellchat analysis"
+title: "10% truncated cellchat analysis"
 output: html_document
-date: "2024-01-20"
+date: "2024-04-05"
 ---
 
 ```{r setup, include=FALSE}
@@ -26,12 +26,11 @@ proj_name <- "FLCvNML"
 ```
 
 ```{r}
-flc.cellchat <- readRDS(file = "./fullDataset/rds/scRNA_FLCnew-2.rds")
-nml.cellchat <- readRDS(file = "./fullDataset/rds/scRNA_NMLnew-2.rds")
+flc.cellchat <- readRDS(file = "./revisedDataset/rds/scRNA_FLCnew-trunc0.15.rds")
+nml.cellchat <- readRDS(file = "./revisedDataset/rds/scRNA_NMLnew-trunc0.15.rds")
 object.list <- list(NML = nml.cellchat, FLC = flc.cellchat)
-cellchat.combined <- readRDS("./revisedDataset/cellChat/merged/FLC_NML_combinedCellchat.rds")
+cellchat.combined <- readRDS("./revisedDataset/cellChat/merged/FLC_NML_combinedCellchat_trunc0.15.rds")
 ```
-
 
 ```{r}
 levels = c("Liver epithelial cells 1","Liver epithelial cells 2", "Liver epithelial cells 3", "Liver epithelial cells 4", "Liver epithelial cells 5", "Liver epithelial cells 6", "Endothelial cells", "Stellate cells", "Neutrophils and macrophages", "Lymphocytes", "Cholangiocyte cells", "Unknown") # set factor
@@ -57,8 +56,8 @@ cols <- c("Liver epithelial cells 1" = "#0072B2",
 
 ```{r}
 ## This is done with the alternative approach to getting counts, which is normalizing the RNA and then separating by tissue status
-dir.create("./revisedDataset/cellChat/merged")
-dir.create("./revisedDataset/cellChat/merged/plots")
+dir.create("./revisedDataset/cellChat/merged/trunc0.15")
+dir.create("./revisedDataset/cellChat/merged/trunc0.15/plots")
 ```
 
 ```{r Combine both cellchat objects}
@@ -68,9 +67,14 @@ cellchat.combined <- mergeCellChat(object.list, add.names = names(object.list), 
 ## Part I: Predict general principles of cell-cell communication
 
 ```{r}
+dir.create("./revisedDataset/cellChat/merged/trunc0.1")
+dir.create("./revisedDataset/cellChat/merged/trunc0.1/plots")
+```
+
+```{r}
 gg1 <- compareInteractions(cellchat.combined, show.legend = F, group = c(1,2), x.lab.rot = TRUE, angle.x = 90, color.use = c("#a6cee3", "#1f78b4"))
 gg2 <- compareInteractions(cellchat.combined, show.legend = F, group = c(1,2), measure = "weight", color.use = c("#a6cee3", "#1f78b4"))
-png(file ="./revisedDataset/cellChat/merged/plots/Number_strength-compareInteractions.png", width = 5, height = 4, units = "in", res = 600)
+png(file = "./revisedDataset/cellChat/merged/trunc0.15/plots/Number_strength-compareInteractions.png", width = 5, height = 4, units = "in", res = 600)
 gg1 + gg2
 dev.off()
 ```
@@ -79,7 +83,7 @@ dev.off()
 par(mfrow = c(1,2), xpd=TRUE)
 gg1 <- netVisual_diffInteraction(cellchat.combined, weight.scale = T, color.use = cols)
 gg2 <- netVisual_diffInteraction(cellchat.combined, weight.scale = T, measure = "weight", color.use = cols)
-png(file ="./revisedDataset/cellChat/merged/plots/Number_strength-Circleplot.png", width = 10, height = 4, units = "in", res = 600)
+png(file = "./revisedDataset/cellChat/merged/trunc0.15/plots/Number_strength-Circleplot.png", width = 10, height = 4, units = "in", res = 600)
 gg1
 gg2
 dev.off()
@@ -90,12 +94,13 @@ gg1 <- netVisual_heatmap(cellchat.combined, color.use = cols)
 #> Do heatmap based on a merged object
 gg2 <- netVisual_heatmap(cellchat.combined, measure = "weight", color.use = cols)
 #> Do heatmap based on a merged object
-png(file ="./revisedDataset/cellChat/merged/plots/Number_strength-heatmap.png", width = 8, height = 5, units = "in", res = 600)
+png(file = "./revisedDataset/cellChat/merged/trunc0.15/plots/Number_strength-heatmap.png", width = 8, height = 5, units = "in", res = 600)
 gg1 + gg2
 dev.off()
 ```
+
 ```{r}
-png(file ="./revisedDataset/cellChat/merged/plots/Number_byStatus_circlePlot.png", width = 7, height = 4, units = "in", res = 600)
+png(file = "./revisedDataset/cellChat/merged/trunc0.15/plots/Number_byStatus_circlePlot.png", width = 7, height = 4, units = "in", res = 600)
 weight.max <- getMaxWeight(object.list, attribute = c("idents","count"))
 par(mfrow = c(1,2), xpd=TRUE)
 for (i in 1:length(object.list)) {
@@ -103,7 +108,7 @@ for (i in 1:length(object.list)) {
 }
 dev.off()
 
-png(file ="./revisedDataset/cellChat/merged/plots/Number_byStatus_NML.png", width = 10, height = 10, units = "in", res = 600)
+png(file = "./revisedDataset/cellChat/merged/trunc0.15/plots/Number_byStatus_NML.png", width = 10, height = 10, units = "in", res = 600)
 netVisual_circle(object.list$NML@net$count, weight.scale = T, label.edge = F, edge.weight.max = weight.max[2], edge.width.max = 12, title.name =  "Number of interactions - NML", color.use = cols)
 dev.off()
 
@@ -121,10 +126,11 @@ for (i in 1:length(object.list)) {
 #> Signaling role analysis on the aggregated cell-cell communication network from all signaling pathways
 #> Signaling role analysis on the aggregated cell-cell communication network from all signaling pathways
 
-png(file ="./revisedDataset/cellChat/merged/plots/SignalingRoleByStatus_heatmap.png", width = 9, height = 4, units = "in", res = 600)
+png(file = "./revisedDataset/cellChat/merged/trunc0.15/plots/SignalingRoleByStatus_heatmap.png", width = 9, height = 4, units = "in", res = 600)
 patchwork::wrap_plots(plots = gg)
 dev.off()
 ```
+
 ```{r}
 num.link <- sapply(object.list, function(x) {rowSums(x@net$count) + colSums(x@net$count)-diag(x@net$count)})
 weight.MinMax <- c(min(num.link), max(num.link)) # control the dot size in the different datasets
@@ -135,7 +141,7 @@ for (i in 1:length(object.list)) {
 #> Signaling role analysis on the aggregated cell-cell communication network from all signaling pathways
 #> Signaling role analysis on the aggregated cell-cell communication network from all signaling pathways
 
-png(file ="./revisedDataset/cellChat/merged/plots/SignalingRole_F_heatmap.png", width = 9, height = 4, units = "in", res = 600)
+png(file ="./revisedDataset/cellChat/merged/trunc0.15/plots/SignalingRole_F_heatmap.png", width = 9, height = 4, units = "in", res = 600)
 patchwork::wrap_plots(plots = gg)
 dev.off()
 ```
@@ -176,7 +182,7 @@ netVisual_embeddingPairwiseZoomIn(cellchat.combined, type = "structural", nCol =
 ### Compute and visualize the pathway distance in the learned joint manifold
 
 ```{r}
-png(file ="./revisedDataset/cellChat/merged/plots/RankSimilarity.png", width = 3, height = 3, units = "in", res = 600)
+png(file = "./revisedDataset/cellChat/merged/trunc0.15/plots/RankSimilarity.png", width = 3, height = 3, units = "in", res = 600)
 rankSimilarity(cellchat.combined, type = "functional", color.use = c("#a6cee3", "#1f78b4"))
 dev.off()
 #> Compute the distance of signaling networks between datasets 1 2
@@ -189,7 +195,7 @@ dev.off()
 ```{r}
 gg1 <- rankNet(cellchat.combined, mode = "comparison", stacked = T, do.stat = TRUE, color.use = c("#a6cee3", "#1f78b4"))
 gg2 <- rankNet(cellchat.combined, mode = "comparison", stacked = F, do.stat = TRUE, color.use = c("#a6cee3", "#1f78b4"))
-png(file ="./revisedDataset/cellChat/merged/plots/RankNet.png", width = 7, height = 3, units = "in", res = 600)
+png(file = "./revisedDataset/cellChat/merged/trunc0.15/plots/RankNet.png", width = 7, height = 5, units = "in", res = 600)
 gg1 + gg2
 dev.off()
 ```
@@ -200,7 +206,7 @@ i = 1
 pathway.union <- union(object.list[[i]]@netP$pathways, object.list[[i+1]]@netP$pathways)
 ht1 = netAnalysis_signalingRole_heatmap(object.list[[i]], pattern = "outgoing", signaling = pathway.union, title = names(object.list)[i], width = 5, height = 6, color.use = cols)
 ht2 = netAnalysis_signalingRole_heatmap(object.list[[i+1]], pattern = "outgoing", signaling = pathway.union, title = names(object.list)[i+1], width = 5, height = 6, color.use = cols)
-png(file ="./revisedDataset/cellChat/merged/plots/OutgoingSignalingRole_heatmap.png", width = 8, height = 6, units = "in", res = 600)
+png(file = "./revisedDataset/cellChat/merged/trunc0.15/plots/OutgoingSignalingRole_heatmap.png", width = 8, height = 6, units = "in", res = 600)
 draw(ht1 + ht2, ht_gap = unit(0.5, "cm"))
 dev.off()
 ```
@@ -208,7 +214,7 @@ dev.off()
 ```{r}
 ht1 = netAnalysis_signalingRole_heatmap(object.list[[i]], pattern = "incoming", signaling = pathway.union, title = names(object.list)[i], width = 5, height = 6, color.heatmap = "GnBu", color.use = cols)
 ht2 = netAnalysis_signalingRole_heatmap(object.list[[i+1]], pattern = "incoming", signaling = pathway.union, title = names(object.list)[i+1], width = 5, height = 6, color.heatmap = "GnBu", color.use = cols)
-png(file ="./revisedDataset/cellChat/merged/plots/IncomingSignalingRole_heatmap.png", width = 8, height = 6, units = "in", res = 600)
+png(file = "./revisedDataset/cellChat/merged/trunc0.15/plots/IncomingSignalingRole_heatmap.png", width = 8, height = 6, units = "in", res = 600)
 draw(ht1 + ht2, ht_gap = unit(0.5, "cm"))
 dev.off()
 ```
@@ -246,6 +252,7 @@ features.name = paste0(pos.dataset, ".merged")
 ```{r}
 cellchat.combined <- identifyOverExpressedGenes(cellchat.combined, group.dataset = "datasets", pos.dataset = pos.dataset, features.name = features.name, only.pos = FALSE, thresh.pc = 0.1, thresh.fc = 0.05,thresh.p = 0.05) 
 ```
+
 ```{r}
 net <- netMappingDEG(cellchat.combined, features.name = features.name)
 net.up <- subsetCommunication(cellchat.combined, net = net, datasets = "FLC",ligand.logFC = 0.05, receptor.logFC = NULL)
@@ -265,23 +272,11 @@ pairLR.use.down = net.down[, "interaction_name", drop = F]
 gg2 <- netVisual_bubble(cellchat.combined, pairLR.use = pairLR.use.down, sources.use = 4, targets.use = c(5:11), comparison = c(1, 2),  angle.x = 90, remove.isolate = T,title.name = paste0("Down-regulated signaling in ", names(object.list)[2]))
 #> Comparing communications on a merged object
 
-png(file ="./revisedDataset/cellChat/merged/plots/Upregulated-downregulated_dotplot.png", width = 10, height = 6, units = "in", res = 600)
+png(file ="./revisedDataset/cellChat/merged/trunc0.15/plots/Upregulated-downregulated_dotplot.png", width = 10, height = 6, units = "in", res = 600)
 gg1 + gg2
 dev.off()
 ```
 
-
-```{r}
-netVisual_bubble(cellchat.combined, signaling = c("PDGF", "TGFb"), comparison = c(1, 2), angle.x = 45)
-#> Comparing communications on a merged object
-```
-
-```{r}
-netVisual_bubble(cellchat.combined, signaling = "PDGF", comparison = c(1, 2), angle.x = 45)
-```
-```{r}
-netVisual_bubble(cellchat.combined, signaling = "TGFb", comparison = c(1, 2), angle.x = 45)
-```
 
 ### Identify the upgulated (increased) and down-regulated (decreased) signaling ligand-receptor pairs 
 
@@ -329,148 +324,10 @@ ComplexHeatmap::draw(ht[[1]] + ht[[2]], ht_gap = unit(0.5, "cm"))
 
 ### Part IV: Visually compare cell-cell communication using Hierarchy plot, Circle plot or Chord diagram
 
-#### PDGF
-```{r}
-dir.create("./revisedDataset/cellChat/merged/plots/PDGF")
-```
-
-```{r}
-pathways.show <- c("PDGF") 
-weight.max <- getMaxWeight(object.list, slot.name = c("netP"), attribute = pathways.show) # control the edge weights across different datasets
-par(mfrow = c(1,2), xpd=TRUE)
-for (i in 1:length(object.list)) {
-  netVisual_aggregate(object.list[[i]], signaling = pathways.show, layout = "circle", edge.weight.max = weight.max[1], edge.width.max = 10, signaling.name = paste(pathways.show, names(object.list)[i]))
-}
-```
-
-```{r}
-par(mfrow = c(1,2), xpd=TRUE)
-ht <- list()
-for (i in 1:length(object.list)) {
-  ht[[i]] <- netVisual_heatmap(object.list[[i]], signaling = pathways.show, color.heatmap = "Reds",title.name = paste(pathways.show, "signaling ",names(object.list)[i]), color.use = cols)
-}
-#> Do heatmap based on a single object 
-#> 
-#> Do heatmap based on a single object
-png(file ="./revisedDataset/cellChat/merged/plots/PDGF/PDGF_heatmap.png", width = 8, height = 6, units = "in", res = 600)
-ComplexHeatmap::draw(ht[[1]] + ht[[2]], ht_gap = unit(0.5, "cm"))
-dev.off()
-```
-
-```{r}
-par(mfrow = c(1,2), xpd=TRUE)
-for (i in 1:length(object.list)) {
-png(file = paste0("./revisedDataset/cellChat/merged/plots/PDGF/", "PDGF_", i, "aggregateChord.png"), width = 8, height = 8, units = "in", res = 600)
-  netVisual_aggregate(object.list[[i]], signaling = pathways.show, layout = "chord", signaling.name = paste(pathways.show, names(object.list)[i]), color.use = cols)
-}
-dev.off()
-```
-
-#### TGFB
-```{r}
-dir.create("./revisedDataset/cellChat/merged/plots/TGFb")
-```
-
-```{r}
-pathways.show <- c("TGFb") 
-weight.max <- getMaxWeight(object.list, slot.name = c("netP"), attribute = pathways.show) # control the edge weights across different datasets
-par(mfrow = c(1,2), xpd=TRUE)
-for (i in 1:length(object.list)) {
-  netVisual_aggregate(object.list[[i]], signaling = pathways.show, layout = "circle", edge.weight.max = weight.max[1], edge.width.max = 10, signaling.name = paste(pathways.show, names(object.list)[i]), color.use = cols)
-}
-```
-
-```{r}
-par(mfrow = c(1,2), xpd=TRUE)
-ht <- list()
-for (i in 1:length(object.list)) {
-  ht[[i]] <- netVisual_heatmap(object.list[[i]], signaling = pathways.show, color.heatmap = "Reds",title.name = paste(pathways.show, "signaling ",names(object.list)[i]), color.use = cols)
-}
-#> Do heatmap based on a single object 
-#> 
-#> Do heatmap based on a single object
-png(file ="./revisedDataset/cellChat/merged/plots/TGFb/TGFb_heatmap.png", width = 8, height = 4.5, units = "in", res = 600)
-ComplexHeatmap::draw(ht[[1]] + ht[[2]], ht_gap = unit(0.5, "cm"))
-dev.off()
-```
-
-```{r}
-pairLR.TGFb <- extractEnrichedLR(cellchat.combined, signaling = pathways.show, geneLR.return = FALSE)
-LR.show <- pairLR.TGFb[1,] # show one ligand-receptor pair
-for (i in 1:length(object.list)) {
-png(file = paste0("./revisedDataset/cellChat/merged/plots/TGFb/TGFbchord_", i, "_diagram_LRpair1.png"), width = 7, height = 7, units = "in", res = 600)
-  netVisual_individual(object.list[[i]], signaling = pathways.show, pairLR.use = LR.show, layout = "chord", signaling.name = paste(pathways.show, names(object.list)[i]), color.use = cols)
-}
-dev.off()
-```
-
-```{r}
-par(mfrow = c(1,2), xpd=TRUE)
-for (i in 1:length(object.list)) {
-png(file = paste0("./revisedDataset/cellChat/merged/plots/TGFb/", "TGFb_", names(object.list)[i], "_aggregateChord.png"), width = 8, height = 8, units = "in", res = 600)
-  netVisual_aggregate(object.list[[i]], signaling = pathways.show, layout = "chord", signaling.name = paste(pathways.show, names(object.list)[i]), color.use = cols)
-}
-dev.off()
-```
-
-
-```{r}
-cellchat.combined@meta$datasets = factor(cellchat.combined@meta$datasets, levels = c("NML", "FLC")) # set factor level
-png(file ="./revisedDataset/cellChat/merged/plots/TGFb/TGFb_splitGeneExpression.png", width = 8, height = 6, units = "in", res = 600)
-plotGeneExpression(cellchat.combined, signaling = "TGFb", split.by = "datasets", colors.ggplot = T, enriched.only = TRUE, color.use = c("#a6cee3", "#1f78b4"))
-dev.off()
-```
-
-#### FGF
-#### PDGF
-```{r}
-dir.create("./revisedDataset/cellChat/merged/plots/")
-```
-
-```{r}
-pathways.show <- c("PDGF") 
-weight.max <- getMaxWeight(object.list, slot.name = c("netP"), attribute = pathways.show) # control the edge weights across different datasets
-par(mfrow = c(1,2), xpd=TRUE)
-for (i in 1:length(object.list)) {
-  netVisual_aggregate(object.list[[i]], signaling = pathways.show, layout = "circle", edge.weight.max = weight.max[1], edge.width.max = 10, signaling.name = paste(pathways.show, names(object.list)[i]))
-}
-```
-
-```{r}
-par(mfrow = c(1,2), xpd=TRUE)
-ht <- list()
-for (i in 1:length(object.list)) {
-  ht[[i]] <- netVisual_heatmap(object.list[[i]], signaling = pathways.show, color.heatmap = "Reds",title.name = paste(pathways.show, "signaling ",names(object.list)[i]))
-}
-#> Do heatmap based on a single object 
-#> 
-#> Do heatmap based on a single object
-png(file ="./revisedDataset/cellChat/merged/plots/PDGF/PDGF_heatmap.png", width = 8, height = 6, units = "in", res = 600)
-ComplexHeatmap::draw(ht[[1]] + ht[[2]], ht_gap = unit(0.5, "cm"))
-dev.off()
-```
-
-```{r}
-par(mfrow = c(1,2), xpd=TRUE)
-for (i in 1:length(object.list)) {
-png(file = paste0("./revisedDataset/cellChat/merged/plots/PDGF/", "PDGF_", i, "aggregateChord.png"), width = 8, height = 8, units = "in", res = 600)
-  netVisual_aggregate(object.list[[i]], signaling = pathways.show, layout = "chord", signaling.name = paste(pathways.show, names(object.list)[i]))
-}
-dev.off()
-```
-
-
-```{r}
-cellchat.combined@meta$datasets = factor(cellchat.combined@meta$datasets, levels = c("NML", "FLC")) # set factor level
-png(file ="./revisedDataset/cellChat/merged/plots/PDGF/PDGF_splitGeneExpression.png", width = 8, height = 6, units = "in", res = 600)
-plotGeneExpression(cellchat.combined, signaling = "PDGF", split.by = "datasets", colors.ggplot = T)
-dev.off()
-```
-
 #### MIF
 
 ```{r}
-dir.create("./revisedDataset/cellChat/merged/plots/MIF")
+dir.create("./revisedDataset/cellChat/merged/trunc0.15/plots/MIF")
 ```
 
 ```{r}
@@ -491,15 +348,15 @@ for (i in 1:length(object.list)) {
 #> Do heatmap based on a single object 
 #> 
 #> Do heatmap based on a single object
-png(file ="./revisedDataset/cellChat/merged/plots/MIF/MIF_heatmap.png", width = 8, height = 4.5, units = "in", res = 600)
+png(file ="./revisedDataset/cellChat/merged/trunc0.15/plots/MIF/MIF_heatmap.png", width = 8, height = 4.5, units = "in", res = 600)
 ComplexHeatmap::draw(ht[[1]] + ht[[2]], ht_gap = unit(0.5, "cm"))
 dev.off()
 ```
 
 ```{r}
 pairLR.MIF <- extractEnrichedLR(flc.cellchat, signaling = pathways.show, geneLR.return = FALSE)
-LR.show <- pairLR.MIF[2,] # show one ligand-receptor pair
-png(file ="./revisedDataset/cellChat/merged/plots/MIF/MIFchord_diagram_ACKR3.png", width = 8, height = 8, units = "in", res = 600)
+LR.show <- pairLR.MIF[1,] # show one ligand-receptor pair
+png(file ="./revisedDataset/cellChat/merged/trunc0.15/plots/MIF/MIFchord_diagram_CXCR4.png", width = 8, height = 8, units = "in", res = 600)
 netVisual_individual(flc.cellchat, signaling = pathways.show, pairLR.use = LR.show, layout = "chord", color.use = cols)
 dev.off()
 ```
@@ -509,7 +366,7 @@ dev.off()
 pathways.show <- c("MIF") 
 pairLR.MIF <- extractEnrichedLR(cellchat.combined, signaling = pathways.show, geneLR.return = FALSE)
 LR.show <- pairLR.MIF[2,] # show one ligand-receptor pair
-png(file ="./revisedDataset/cellChat/merged/plots/MIF/MIFchord_diagram_LRpair2.png", width = 7, height = 7, units = "in", res = 600)
+png(file ="./revisedDataset/cellChat/merged/trunc0.15/plots/MIF/MIFchord_diagram_LRpair2.png", width = 7, height = 7, units = "in", res = 600)
 for (i in 1:length(object.list)) {
   netVisual_individual(object.list[[i]], signaling = pathways.show, pairLR.use = LR.show, layout = "chord", signaling.name = paste(pathways.show, names(object.list)[i]))
 }
@@ -517,10 +374,11 @@ dev.off()
 ```
 ```{r}
 cellchat.combined@meta$datasets = factor(cellchat.combined@meta$datasets, levels = c("NML", "FLC")) # set factor level
-png(file ="./revisedDataset/cellChat/merged/plots/GDF/GDF_splitGeneExpression.png", width = 8, height = 6, units = "in", res = 600)
-plotGeneExpression(cellchat.combined, signaling = "GDF", split.by = "datasets", colors.ggplot = T)
+png(file ="./revisedDataset/cellChat/merged/trunc0.15/plots/MIF/MIF_splitGeneExpression.png", width = 8, height = 6, units = "in", res = 600)
+plotGeneExpression(cellchat.combined, signaling = "MIF", split.by = "datasets", colors.ggplot = T)
 dev.off()
 ```
+
 ```{r}
 pairLR.use.up = net.up[, "interaction_name", drop = F]
 gg1 <- netVisual_bubble(cellchat.combined, pairLR.use = pairLR.use.up, sources.use = 4, targets.use = c(5:11), comparison = c(1, 2),  angle.x = 90, remove.isolate = T,title.name = paste0("Up-regulated signaling in ", names(object.list)[2]))
@@ -538,9 +396,8 @@ dev.off()
 b <- netVisual_bubble(cellchat.combined, signaling = "MIF", comparison = c(1, 2), return.data = FALSE, angle.x = 45)
 ```
 
-
 ```{r}
-png(file ="./revisedDataset/cellChat/merged/plots/MIF/MIFcombined_dotplot.png", width = 7.8, height = 4.8, units = "in", res = 600)
+png(file ="./revisedDataset/cellChat/merged/trunc0.15/plots/MIF/MIFcombined_dotplot.png", width = 11.5, height = 5.2, units = "in", res = 600)
 netVisual_bubble(cellchat.combined, signaling = "MIF", comparison = c(1, 2), return.data = FALSE, angle.x = 45, color.text = c("#6baed6", "#2171b5")) +
     theme(plot.margin = unit(c(1,1,1,1), "in"))
 dev.off()
@@ -550,14 +407,97 @@ dev.off()
 pairLR.MIF <- extractEnrichedLR(cellchat.combined, signaling = pathways.show, geneLR.return = FALSE)
 LR.show <- pairLR.MIF[2,] # show one ligand-receptor pair
 for (i in 1:length(object.list)) {
-png(file = paste0("./revisedDataset/cellChat/merged/plots/MIF/MIFchord_", i, "_diagram_LRpair1.png"), width = 7, height = 7, units = "in", res = 600)
+png(file = paste0("./revisedDataset/cellChat/merged/trunc0.15/plots/MIF/MIFchord_", i, "_diagram_LRpair1.png"), width = 7, height = 7, units = "in", res = 600)
   netVisual_individual(object.list[[i]], signaling = pathways.show, pairLR.use = LR.show, layout = "chord", signaling.name = paste(pathways.show, names(object.list)[i]), color.use = cols)
 }
 dev.off()
 ```
 
+#### CXCL
 
 ```{r}
-saveRDS(cellchat.combined, "./revisedDataset/cellChat/merged/FLC_NML_combinedCellchat.rds")
+dir.create("./revisedDataset/cellChat/merged/trunc0.15/plots/CXCL")
 ```
 
+```{r}
+pathways.show <- c("CXCL") 
+weight.max <- getMaxWeight(object.list, slot.name = c("netP"), attribute = pathways.show) # control the edge weights across different datasets
+par(mfrow = c(1,2), xpd=TRUE)
+for (i in 1:length(object.list)) {
+  netVisual_aggregate(object.list[[i]], signaling = pathways.show, layout = "circle", edge.weight.max = weight.max[1], edge.width.max = 10, signaling.name = paste(pathways.show, names(object.list)[i]), color.use = cols)
+}
+```
+
+```{r}
+par(mfrow = c(1,2), xpd=TRUE)
+ht <- list()
+for (i in 1:length(object.list)) {
+  ht[[i]] <- netVisual_heatmap(object.list[[i]], signaling = pathways.show, color.heatmap = "Reds",title.name = paste(pathways.show, "signaling ",names(object.list)[i]), color.use = cols)
+}
+#> Do heatmap based on a single object 
+#> 
+#> Do heatmap based on a single object
+png(file ="./revisedDataset/cellChat/merged/trunc0.15/plots/MIF/MIF_heatmap.png", width = 8, height = 4.5, units = "in", res = 600)
+ComplexHeatmap::draw(ht[[1]] + ht[[2]], ht_gap = unit(0.5, "cm"))
+dev.off()
+```
+
+```{r}
+pairLR.MIF <- extractEnrichedLR(flc.cellchat, signaling = pathways.show, geneLR.return = FALSE)
+LR.show <- pairLR.MIF[1,] # show one ligand-receptor pair
+png(file ="./revisedDataset/cellChat/merged/trunc0.15/plots/MIF/MIFchord_diagram_CXCR4.png", width = 8, height = 8, units = "in", res = 600)
+netVisual_individual(flc.cellchat, signaling = pathways.show, pairLR.use = LR.show, layout = "chord", color.use = cols)
+dev.off()
+```
+
+```{r}
+# Chord diagram
+pathways.show <- c("MIF") 
+pairLR.MIF <- extractEnrichedLR(cellchat.combined, signaling = pathways.show, geneLR.return = FALSE)
+LR.show <- pairLR.MIF[2,] # show one ligand-receptor pair
+png(file ="./revisedDataset/cellChat/merged/trunc0.15/plots/MIF/MIFchord_diagram_LRpair2.png", width = 7, height = 7, units = "in", res = 600)
+for (i in 1:length(object.list)) {
+  netVisual_individual(object.list[[i]], signaling = pathways.show, pairLR.use = LR.show, layout = "chord", signaling.name = paste(pathways.show, names(object.list)[i]))
+}
+dev.off()
+```
+```{r}
+cellchat.combined@meta$datasets = factor(cellchat.combined@meta$datasets, levels = c("NML", "FLC")) # set factor level
+png(file ="./revisedDataset/cellChat/merged/trunc0.15/plots/MIF/MIF_splitGeneExpression.png", width = 8, height = 6, units = "in", res = 600)
+plotGeneExpression(cellchat.combined, signaling = "MIF", split.by = "datasets", colors.ggplot = T)
+dev.off()
+```
+
+```{r}
+pairLR.use.up = net.up[, "interaction_name", drop = F]
+gg1 <- netVisual_bubble(cellchat.combined, pairLR.use = pairLR.use.up, sources.use = 4, targets.use = c(5:11), comparison = c(1, 2),  angle.x = 90, remove.isolate = T,title.name = paste0("Up-regulated signaling in ", names(object.list)[2]))
+#> Comparing communications on a merged object
+pairLR.use.down = net.down[, "interaction_name", drop = F]
+gg2 <- netVisual_bubble(cellchat.combined, pairLR.use = pairLR.use.down, sources.use = 4, targets.use = c(5:11), comparison = c(1, 2),  angle.x = 90, remove.isolate = T,title.name = paste0("Down-regulated signaling in ", names(object.list)[2]))
+#> Comparing communications on a merged object
+
+png(file ="./revisedDataset/cellChat/merged/plots/Upregulated-downregulated_dotplot.png", width = 10, height = 6, units = "in", res = 600)
+gg1 + gg2
+dev.off()
+```
+
+```{r}
+b <- netVisual_bubble(cellchat.combined, signaling = "MIF", comparison = c(1, 2), return.data = FALSE, angle.x = 45)
+```
+
+```{r}
+png(file ="./revisedDataset/cellChat/merged/trunc0.15/plots/MIF/MIFcombined_dotplot.png", width = 11.5, height = 5.2, units = "in", res = 600)
+netVisual_bubble(cellchat.combined, signaling = "MIF", comparison = c(1, 2), return.data = FALSE, angle.x = 45, color.text = c("#6baed6", "#2171b5")) +
+    theme(plot.margin = unit(c(1,1,1,1), "in"))
+dev.off()
+```
+
+```{r}
+pairLR.MIF <- extractEnrichedLR(cellchat.combined, signaling = pathways.show, geneLR.return = FALSE)
+LR.show <- pairLR.MIF[2,] # show one ligand-receptor pair
+for (i in 1:length(object.list)) {
+png(file = paste0("./revisedDataset/cellChat/merged/trunc0.15/plots/MIF/MIFchord_", i, "_diagram_LRpair1.png"), width = 7, height = 7, units = "in", res = 600)
+  netVisual_individual(object.list[[i]], signaling = pathways.show, pairLR.use = LR.show, layout = "chord", signaling.name = paste(pathways.show, names(object.list)[i]), color.use = cols)
+}
+dev.off()
+```

@@ -80,11 +80,6 @@ ggsave(paste0("./revisedDataset/UMAPs/metadata/harmony/", proj_name, "_umap_clus
 
 ```{r}
 dir.create("./revisedDataset/UMAPs/celTypeMarkers/noLabel")
-
-for (gene in c("EPCAM", "PKHD1", "FGFR2", "TYROBP", "SRGN", "C1QB", "FYN", "NOSTRIN", "PTPRB", "LDB2", "ACTA2", "CALD1", "NPPB","CYP3A4", "RPS21","RPL4","S100A4","CFL1","TMSB4X","B2M","ACTG1","EEF1B2","COX7C","HNRNPA1","PARP8","MALAT1","CST7","COX4I1","ID2","ARHGAP15","CELF2","PTPRC","RPS27","UQCRB","RPS3","PPIA","TMSB10","FYN", "HNF4A")) {
-  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, raster = FALSE, order = TRUE)
-  ggsave(paste0("./revisedDataset/UMAPs/celTypeMarkers/noLabel/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-named-noLabel.png"), units = "in", width = 5, height = 5, dpi = 600)
-}
 ```
 
 ```{r}
@@ -96,12 +91,13 @@ for (gene in c("EPCAM", "PKHD1", "FGFR2", "TYROBP", "SRGN", "C1QB", "FYN", "NOST
 }
 ```
 
+
 ## Figure 2
 
 #### Heatmap using complexheatmap
 
 ```{r}
-features = c("VCAN", "SLC16A14", "LINC00473", "PDE10A","FAM19A5", "TMEM163", "OAT", "CA12", "BACE2", "COL4A1",
+features = c("VCAN", "SLC16A14", "LINC00473", "PDE10A","TAFA5", "TMEM163", "OAT", "CA12", "BACE2", "COL4A1",
     "FAM167A", "GPRIN3", "IRF4", "KIF26B", "TESC",
     "CD68", # Ross, H. M.et al.Fibrolamellar carcinomas are positive for CD68.Mod. Pathol.24,390–395 (2011)
     "SOX9", "SOX17", "PDX1", "POU5F1", "SALL4", "SHH", "NANOG", "KLF4", "SOX2", "BMI1", # Oikawa 2015
@@ -132,7 +128,7 @@ for (gene in c("CD68")) {
 ### Using dittoSeq to make the heatmap (doesn't work)
 
 ```{r}
-features = c("VCAN", "SLC16A14", "LINC00473", "PDE10A","FAM19A5", "TMEM163", "OAT", "CA12", "BACE2", "COL4A1",
+features = c("VCAN", "SLC16A14", "LINC00473", "PDE10A","TAFA5", "TMEM163", "OAT", "CA12", "BACE2", "COL4A1",
     "FAM167A", "GPRIN3", "IRF4", "KIF26B", "TESC",
     "CD68", # Ross, H. M.et al.Fibrolamellar carcinomas are positive for CD68.Mod. Pathol.24,390–395 (2011)
     "SOX9", "SOX17", "PDX1", "POU5F1", "SALL4", "SHH", "NANOG", "KLF4", "SOX2", "BMI1", # Oikawa 2015
@@ -140,7 +136,8 @@ features = c("VCAN", "SLC16A14", "LINC00473", "PDE10A","FAM19A5", "TMEM163", "OA
     "PCSK1", #Malouf, G. G.et al.Transcriptional profiling of pure fibrolamellarhepatocellular carcinoma reveals an endocrine signature.Hepatology59,2228–2237
     "KRT7", # Malouf G, Falissard B, Azoulay D, et al. Is histological diagnosis ofprimary liver carcinomas withfibrous stroma reproducibleamong experts? J Clin Pathol 2009;62(06):519–5248Abdul-Al HM, Wang G, Makhlouf HR, Goodman ZD. Fibrolamellarhepatocellular carcinoma: an immunohistochemical comparisonwith conventional hepatocellular carcinoma. Int J Surg Pathol2010;18(05):313–318
     "TCN1", # D. L. Lildballe, K. Q. T. Nguyen, S. S. Poulsen, H. O. Nielsen,and E. Nexo, “Haptocorrin as marker of disease progressionin �brolamellar hepatocellular carcinoma,”European Journal ofSurgical Oncology
-    "PRKACA", "DNAJB1")
+    "PRKACA", "DNAJB1", "CCN2") %>% 
+  sort()
 ```
 
 ```{r}
@@ -164,13 +161,22 @@ hm
 ### Heatmap using Seurat Native features
 
 ```{r}
-DoHeatmap(harmonized.seurat, features = features, group.by = "cluster_named", assay = "SCT", slot = "scale.data")
+hm.d <- DoHeatmap(harmonized.seurat, features = features, group.by = "cluster_named", assay = "SCT", slot = "scale.data")
 ```
+
+```{r}
+png("./revisedDataset/manuscript/figure2/Heatmap_hm_d.png", width = 17, height = 9, units = "in", res = 600)
+hm.d
+dev.off()
+```
+
 
 ### Heatmap using avg expression
 
 ```{r}
-avg_expression <- AverageExpression(harmonized.seurat, return.seurat = TRUE, group.by = c("ident", "status"))
+avg_expression.log <- AggregateExpression(harmonized.seurat, return.seurat = TRUE, group.by = c("ident", "status"), normalization.method = "LogNormalize")
+avg_expression.clr <- AggregateExpression(harmonized.seurat, return.seurat = TRUE, group.by = c("ident", "status"), normalization.method = "CLR")
+avg_expression.rc <- AggregateExpression(harmonized.seurat, return.seurat = TRUE, group.by = c("ident", "status"), normalization.method = "RC")
 ```
 
 ```{r}
@@ -187,19 +193,51 @@ new_order <- c("Liver epithelial cells 1_FLC", "Liver epithelial cells 1_NML",
                "Cholangiocyte cells_FLC", "Cholangiocyte cells_NML",
                "Unknown_FLC", "Unknown_NML")
 
-avg_expression <- SetIdent(avg_expression, value = new_order)
+avg_expression.rc <- SetIdent(avg_expression.rc, value = new_order)
+avg_expression.log <- SetIdent(avg_expression.log, value = new_order)
+avg_expression.clr <- SetIdent(avg_expression.clr, value = new_order)
 ```
 
 ```{r}
-p1 <- DoHeatmap(avg_expression, features = features, draw.lines = FALSE, group.by = "ident", size = 4)
+p1 <- DoHeatmap(avg_expression.clr, features = features, draw.lines = FALSE, group.by = "ident", size = 4)
+p2 <- DoHeatmap(avg_expression.log, features = features, draw.lines = FALSE, group.by = "ident", size = 4)
+p3 <- DoHeatmap(avg_expression.rc, features = features, draw.lines = FALSE, group.by = "ident", size = 4)
+```
+
+```{r}
+png("./revisedDataset/manuscript/figure2/Heatmap_clr.png", width = 17, height = 9, units = "in", res = 600)
 p1
+dev.off()
 ```
 
 ```{r}
-dir.create("./revisedDataset/manuscript")
-dir.create("./revisedDataset/manusc ript/figure2")
-ggsave("./revisedDataset/manuscript/figure2/FLCmarkerheatmap.png", dpi = 300, width = 12, height = 10)
+png("./revisedDataset/manuscript/figure2/Heatmap_log.png", width = 17, height = 9, units = "in", res = 600)
+p2
+dev.off()
 ```
+
+```{r}
+png("./revisedDataset/manuscript/figure2/Heatmap_rc.png", width = 17, height = 9, units = "in", res = 600)
+p3
+dev.off()
+```
+### Heatmap using sc heatmap
+
+```{r}
+harmonized.seurat <- SetIdent(harmonized.seurat, value = new_order)
+```
+
+
+```{r}
+p4 <- DoHeatmap(subset(harmonized.seurat, downsample = 100), features = features, size = 3)
+```
+```{r}
+png("./revisedDataset/manuscript/figure2/sc_heatmap.png", width = 17, height = 9, units = "in", res = 600)
+p4
+dev.off()
+```
+
+
 
 #### Dittoseq using avg expression seurat
 
@@ -224,6 +262,26 @@ marker_genes <- markers$gene
 expression_matrix <- GetAssayData(harmonized.seurat, slot = "counts")[marker_genes, ]
 ```
 
+### Violin plot
+
+```{r}
+p <- VlnPlot(harmonized.seurat, features = c("SLC16A14", "VCAN", "CD68"), split.by = "status")
+```
+
+```{r}
+dir.create("./revisedDataset/violinPlots")
+```
+
+```{r}
+ggsave("./revisedDataset/violinPlots/violinPlots.png", dpi = 600, width = 16, height = 5)
+```
+
+```{r}
+for (gene in c("EPCAM", "PKHD1", "FGFR2", "TYROBP", "SRGN", "C1QB", "FYN", "NOSTRIN", "PTPRB", "LDB2", "ACTA2", "CALD1", "NPPB","CYP3A4", "RPS21","RPL4","S100A4","CFL1","TMSB4X","B2M","ACTG1","EEF1B2","COX7C","HNRNPA1","PARP8","MALAT1","CST7","COX4I1","ID2","ARHGAP15","CELF2","PTPRC","RPS27","UQCRB","RPS3","PPIA","TMSB10","FYN", "HNF4A")) {
+  VlnPlot(harmonized.seurat, features = gene, split.by = "status")
+  ggsave(paste0("./revisedDataset/violinPlots/", proj_name, "_", gene, "_violinPlot.png"), units = "in", width = 5, height = 5, dpi = 600)
+}
+```
 
 
 
@@ -332,3 +390,63 @@ ggsave("./revisedDataset/clusterProfiler/clusterProfiler_enrichPathway_Epi2-log2
 
 write.csv(cc.pw@compareClusterResult, "./revisedDataset/clusterProfiler/clusterProfiler_enrichPathway_Epi2_log2FC0.5-completeCase.csv")
 ```
+
+### Supplementary
+
+#### S3
+```{r}
+CellsMeta <-harmonized.seurat@meta.data
+CellsMeta.m <- merge(CellsMeta, patient.id.status, by = "id", all.x = TRUE) 
+rownames(CellsMeta.m) <- rownames(CellsMeta)
+```
+
+```{r}
+sample_annotations <- c(unique(harmonized.seurat$id))
+harmonized.seurat <- AddMetaData(object = harmonized.seurat, metadata = CellsMeta.m)
+```
+
+#### Metadata
+
+```{r}
+p1 <- DimPlot(harmonized.seurat, group.by = "Patient.Status", raster = FALSE, cols = c("#0072B2", #1
+                             "#D55E00", #2
+                             "#009E73", #3
+                             "#CC79A7",  #4
+                             "#926B40", #5
+                             "#56B4E9", #6
+                             "#E69F00",#7
+                             "#F0E442", #8
+                             "#9983BD", #9
+                             "#3BBCA8", #10
+                             "#8A9FD1")) +
+  theme(legend.position = "bottom",
+        legend.margin = margin(2.5, 3, 2.5, 2.5),
+        legend.text=element_text(size=7)) +
+  guides(color = guide_legend(title=NULL,
+                              ncol=3, 
+                              nrow=4,
+                              override.aes = list(size = 6, shape = "square")))
+
+p2 <- DimPlot(harmonized.seurat, group.by = "status", raster = FALSE, cols = c("#272E6A",
+                               "#89288F"), split.by = "status") +
+  theme(legend.position = "bottom",
+        legend.margin = margin(2.5, 3, 2.5, 2.5),
+        legend.text=element_text(size=7)) +
+  guides(color = guide_legend(title=NULL,
+                              ncol = 2, 
+                              nrow = 1,
+                              override.aes = list(size = 6, shape = "square"))) 
+widths <- c(1, 1)
+
+aligned_plots <- plot_grid(p1, p2, align = "v",  axis = "l", rel_widths = widths, rel_heights = heights, nrow = 1)
+ggsave(paste0("./revisedDataset/UMAPs/metadata/harmony/", proj_name, "_umap_clusterNamed-nonraster.png"), units = 'in', width = 10, height = 6.5, dpi = 600)
+```
+
+```{r}
+p1
+ggsave("./revisedDataset/UMAPs/metadata/harmony/Patient_UMAP.png", units = "in", width = 6, height = 7, dpi = 600)
+p2
+ggsave("./revisedDataset/UMAPs/metadata/harmony/Status_UMAP.png", units = "in", width = 6, height = 6.5, dpi = 600)
+
+```
+

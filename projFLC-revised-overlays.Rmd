@@ -118,10 +118,150 @@ for (gene in c("POSTN", "CALCR")) {
 
 ```{r}
 DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("GDF15")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4, label = TRUE,
+              repel = TRUE, order = TRUE)
+  ggsave(paste0("./revisedDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-named.png"), units = "in", width = 18, height = 10, dpi = 300)
+}
+```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("DNM1L", "OPA1", "MFN1", "MFN2")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4, label = TRUE,
+              repel = TRUE, order = TRUE)
+  ggsave(paste0("./revisedDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-named.png"), units = "in", width = 18, height = 10, dpi = 300)
+}
+```
+
+
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
 for (gene in c("FGF7", "CALCR", "CALCA", "CALCRL", "CTGF")) {
   FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4, label = TRUE,
               repel = TRUE, order = TRUE)
   ggsave(paste0("./revisedDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-named.png"), units = "in", width = 18, height = 10, dpi = 300)
+}
+```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("SLC16A14", "VCAN", "HSPB1", "TNRC6C")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4, label = TRUE, label.size = 7, repel = TRUE, order = TRUE)
+  ggsave(paste0("./revisedDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-named.png"), units = "in", width = 18, height = 10, dpi = 300)
+}
+```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("GDF15", "GFRAL")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4, label = TRUE, repel = TRUE, order = TRUE)
+  ggsave(paste0("./revisedDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-named.png"), units = "in", width = 18, height = 10, dpi = 300)
+}
+```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("SLC16A14", "VCAN")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4, label = TRUE, label.size = 7, repel = TRUE, order = TRUE)
+  ggsave(paste0("./revisedDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-named.png"), units = "in", width = 18, height = 10, dpi = 300)
+}
+```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("OAT", "IRF4", "CA12")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4, label = TRUE, label.size = 7, repel = TRUE, order = TRUE)
+  ggsave(paste0("./revisedDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-named.png"), units = "in", width = 18, height = 10, dpi = 600)
+}
+```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("SOX2", "NANOG", "POU5F1", "BACE2", "KIF26B", "KRT7", "BMI1", "AGR2", "PCSK1", "TESC", "TMEM163")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4, label = FALSE)
+  ggsave(paste0("./revisedDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-named.png"), units = "in", width = 18, height = 10, dpi = 600)
+}
+```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "RNA"
+for (gene in c("SOX2", "NANOG", "POU5F1", "BACE2", "KIF26B", "KRT7", "BMI1", "AGR2", "PCSK1", "TESC", "TMEM163")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4, label = FALSE, order = TRUE)
+  ggsave(paste0("./revisedDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-RNA-named.png"), units = "in", width = 18, height = 10, dpi = 600)
+}
+```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("VCAN")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4, label = FALSE)
+  ggsave(paste0("./revisedDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-unnamed.png"), units = "in", width = 18, height = 10, dpi = 600)
+}
+```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("VCAN", "SLC16A14", "CCN2")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4, label = FALSE, order = TRUE)
+  ggsave(paste0("./revisedDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-unnamed.png"), units = "in", width = 18, height = 10, dpi = 600)
+}
+```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("PTPRB", "PAEP", "AC093515.1", "AGR2", "MYH4", "CGA", "NTS", "SOX11", "APOA4", "ECEL1", "S100P", "AC114757.1", "CYP17A1", "KCNQ3", "C1QL1", "MUC13", "GUCA2B", "ERVH-1", "UGT2B11", "AC112770.1", "AC108517.1", "PCSK1", "AC103718.1", "LYPD1", "HAPLN1", "CA9", "RNF182", "AL391845.2", "LINC01419", "HOXD10", "AC241644.2", "CDH17", "EDIL3", "MMP1", "REG1A", "HOXD1", "AC080132.1", "LEF1", "FOXQ1", "FAM83A-AS1", "PLAU", "AC018767.2", "PGF", "SPX", "INSL4", "AC113383.1", "UNC5D", "ZNF385D-AS2", "AL136372.2", "MTRNR2L1", "PRND", "PART1", "SFRP2", "CA12", "AC093607.1", "UCN", "PLA2G2A", "MEOX2", "SPINK1", "AC006019.3", "PIK3R6", "TNFRSF4", "HIST1H1C")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4, label = FALSE, order = TRUE)
+  ggsave(paste0("./revisedDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-unnamed.png"), units = "in", width = 18, height = 10, dpi = 600)
+}
+```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("CD68")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4, label = FALSE, order = TRUE)
+  ggsave(paste0("./revisedDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-unnamed.png"), units = "in", width = 18, height = 10, dpi = 600)
+}
+```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("NTS", "PAEP", "CGA", "UGT2B11", "AGR2", "ECEL1", "CA12", "AC093607.1", "CA9", "LINC00499", "MUC13", "PART1", "MYH4", "FOXQ1", "MUC5B", "AC112770.1", "APOA4", "LYPD1", "MUC13", "CDH17", "PLAC4", "C1QL1", "TRIM31", "KCNK9", "S100P", "MUC5B", "REG1A", "PCSK1", "KCNK9", "PAK3", "POSTN", "NRG2", "NRSN1", "CYP17A1", "CDH11")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4, label = FALSE, order = TRUE)
+  ggsave(paste0("./revisedDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-unnamed.png"), units = "in", width = 18, height = 10, dpi = 600)
+}
+```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("SOX17")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4, label = FALSE, order = TRUE)
+  ggsave(paste0("./revisedDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-unnamed.png"), units = "in", width = 18, height = 10, dpi = 600)
+}
+```
+
+```{r}
+DefaultAssay(harmonized.seurat) <- "SCT"
+for (gene in c("ACTA2", "LOXL1")) {
+  FeaturePlot(harmonized.seurat, features = gene, pt.size = 0.2, split.by = "status", ncol = 4, label = FALSE, order = TRUE)
+  ggsave(paste0("./revisedDataset/UMAPs/UMAPoverlays/", proj_name, "_", gene, "-featurePlot-integrated-byStatus-SCT-unnamed.png"), units = "in", width = 18, height = 10, dpi = 600)
+}
+```
+
+```{r}
+for (gene in c("VCAN", "SLC16A14", "PDE10A","TAFA5", "TMEM163", "OAT", "CA12", "BACE2", "COL4A1",
+    "FAM167A", "GPRIN3", "IRF4", "KIF26B", "TESC",
+    "CD68", # Ross, H. M.et al.Fibrolamellar carcinomas are positive for CD68.Mod. Pathol.24,390–395 (2011)
+    "SOX9", "SOX17", "PDX1", "POU5F1", "SALL4", "SHH", "NANOG", "KLF4", "SOX2", "BMI1", # Oikawa 2015
+    "AGR2", #Wang, Z., Hao, Y. & Lowe, A. W. The adenocarcinoma-associated antigen,AGR2, promotes tumor growth, cell migration, and cellular transformation.Cancer Res.68,492–497  
+    "PCSK1", #Malouf, G. G.et al.Transcriptional profiling of pure fibrolamellarhepatocellular carcinoma reveals an endocrine signature.Hepatology59,2228–2237
+    "KRT7", # Malouf G, Falissard B, Azoulay D, et al. Is histological diagnosis ofprimary liver carcinomas withfibrous stroma reproducibleamong experts? J Clin Pathol 2009;62(06):519–5248Abdul-Al HM, Wang G, Makhlouf HR, Goodman ZD. Fibrolamellarhepatocellular carcinoma: an immunohistochemical comparisonwith conventional hepatocellular carcinoma. Int J Surg Pathol2010;18(05):313–318
+    "TCN1", # D. L. Lildballe, K. Q. T. Nguyen, S. S. Poulsen, H. O. Nielsen,and E. Nexo, “Haptocorrin as marker of disease progressionin �brolamellar hepatocellular carcinoma,”European Journal ofSurgical Oncology
+    "PRKACA", "DNAJB1",
+    "CCN2")) {
+  VlnPlot(harmonized.seurat, features = gene, split.by = "status")
+  ggsave(paste0("./revisedDataset/violinPlots/", proj_name, "_", gene, "-violinPlot-integrated-byStatus-SCT-named.png"), units = "in", width = 8, height = 6, dpi = 600)
 }
 ```
 
