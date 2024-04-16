@@ -370,15 +370,15 @@ dev.off()
 
 ```{r}
 pairLR.PERIO <- extractEnrichedLR(cellchat, signaling = pathways.show, geneLR.return = FALSE)
-LR.show <- pairLR.PERIO[1,] # show one ligand-receptor pair
-png(file ="./revisedDataset/cellChat/NMLnew/plots/pathwayDissections/TGFb/NMLchord_diagram_LRpair.png", width = 10, height = 8, units = "in", res = 600)
+LR.show <- pairLR.PERIO[2,] # show one ligand-receptor pair
+png(file ="./revisedDataset/cellChat/NMLnew/plots/pathwayDissections/TGFb/NMLchord_diagram_LRpair2.png", width = 10, height = 8, units = "in", res = 600)
 netVisual_individual(cellchat, signaling = pathways.show, pairLR.use = LR.show, layout = "chord")
 dev.off()
 ```
 
 ```{r}
 # show all the significant interactions (L-R pairs) from some cell groups (defined by 'sources.use') to other cell groups (defined by 'targets.use')
-png(file ="./revisedDataset/cellChat/NMLnew/plots/pathwayDissections/TGFb/NML_PERIOSTIN_L-R_contribution.png", width = 5, height = 4, units = "in", res = 600)
+png(file ="./revisedDataset/cellChat/NMLnew/plots/pathwayDissections/TGFb/NML_TGFB_L-R_contribution.png", width = 5, height = 4, units = "in", res = 600)
 netVisual_bubble(cellchat,remove.isolate = FALSE, signaling = c("TGFb"))
 dev.off()
 #> Comparing communications on a single object
